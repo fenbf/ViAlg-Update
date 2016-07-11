@@ -1,0 +1,134 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Polish resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_PLK)
+#ifdef _WIN32
+LANGUAGE LANG_POLISH, SUBLANG_DEFAULT
+#pragma code_page(1250)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU1 MENU 
+BEGIN
+    POPUP "File"
+    BEGIN
+        MENUITEM "Exit",                        ID_FILE_EXIT
+    END
+    POPUP "Algorithm"
+    BEGIN
+        POPUP "Method"
+        BEGIN
+            MENUITEM "Bubble Sort",                 ID_METHOD_BUBBLESORT
+            MENUITEM "Shaker Sort",                 ID_METHOD_SHAKERSORT
+            MENUITEM "Selection Sort",              ID_METHOD_SELECTIONSORT
+            MENUITEM "Insertion Sort",              ID_METHOD_INSERTIONSORT
+            MENUITEM "Shell Sort",                  ID_METHOD_SHELLSORT
+        END
+        POPUP "Data Order"
+        BEGIN
+            MENUITEM "Sorted",                      ID_DATAORDER_SORTED
+            MENUITEM "Reversed",                    ID_DATAORDER_REVERSED
+            MENUITEM "Randomized",                  ID_DATAORDER_RANDOMIZED
+            MENUITEM "Special Randomized",          ID_DATAORDER_SPECIALRANDOMIZED
+            MENUITEM "Regenerate Each Time",        ID_DATAORDER_REGENERATE
+        END
+        POPUP "Elements"
+        BEGIN
+            MENUITEM "Set to 20",                   ID_ELEMENTS_SETTO20
+            MENUITEM "Set to 100",                  ID_ELEMENTS_SETTO100
+            MENUITEM "Set to 200",                  ID_ELEMENTS_SETTO200
+            MENUITEM "Increase + 10",               ID_ELEMENTS_INCREASE
+            MENUITEM "Decrease -10",                ID_ELEMENTS_DECREASE
+        END
+        MENUITEM "RunAgain",                    ID_ALGORITHM_RUNAGAIN
+    END
+    POPUP "Flow"
+    BEGIN
+        MENUITEM "Pause",                       ID_FLOW_PAUSE
+        MENUITEM "Increase Tempo",              ID_FLOW_INCREASETEMPO
+        MENUITEM "Decrease Tempo",              ID_FLOW_DECREASETEMPO
+        MENUITEM "Set to Slow",                 ID_FLOW_SETTOSLOW
+        MENUITEM "Set to Fast",                 ID_FLOW_SETTOFAST
+    END
+    POPUP "View"
+    BEGIN
+        POPUP "Diagram Type"
+        BEGIN
+            MENUITEM "Points",                      ID_DIAGRAMTYPE_POINTS
+            MENUITEM "Boxes",                       ID_DIAGRAMTYPE_BOXES
+            MENUITEM "Pyramids",                    ID_DIAGRAMTYPE_PYRAMIDS
+            MENUITEM "Cylinders",                   ID_DIAGRAMTYPE_CYLINDERS
+        END
+        MENUITEM "Light",                       ID_VIEW_LIGHT
+        MENUITEM "Reflection",                  ID_VIEW_REFLECTION
+        MENUITEM "Textured",                    ID_VIEW_TEXTURED
+        MENUITEM "Floor",                       ID_VIEW_FLOOR
+        MENUITEM "Draw Frame",                  ID_VIEW_FRAME
+        MENUITEM "Horizontal",                  ID_VIEW_HORIZ
+        MENUITEM "Info",                        ID_VIEW_INFO
+    END
+    POPUP "Help"
+    BEGIN
+        MENUITEM "About",                       ID_HELP_ABOUT
+    END
+END
+
+#endif    // Polish resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
