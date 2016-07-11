@@ -82,7 +82,7 @@ bool OnExit();
 /*-----------------------------------------------------------------------------+
 |                                    MAIN                                      |
 +-----------------------------------------------------------------------------*/
-int WINAPI WinMain(HINSTANCE current_in, HINSTANCE prev_in, LPSTR cmdl, int n_show) {
+int WINAPI WinMain(_In_ HINSTANCE current_in, _In_opt_ HINSTANCE prev_in, _In_ LPSTR cmdl, _In_ int n_show) {
 	
 	g_Log.Init("log.html");
 	try {

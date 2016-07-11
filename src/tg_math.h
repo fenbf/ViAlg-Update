@@ -578,7 +578,7 @@ inline MATRIX3X3 Mat3x3Rotation(float a)										{ return MATRIX3X3(fcos(a), fs
 MATRIX3X3 Mat3x3Transformation(float a, float sx, float sy,  float x, float y);
 
 // Matrix 4x4:
-inline void Mat4x4Zero(MATRIX3X3_PTR mt)										{ memset((void *)mt->M, 0, 64); }
+inline void Mat4x4Zero(MATRIX4X4_PTR mt)										{ memset((void *)mt->M, 0, 64); }
 inline void Mat4x4Identity(MATRIX4X4_PTR mt)									{ memcpy((void *)mt->M, (const void *)MATRIX4X4::IDENTITY, sizeof(MATRIX4X4)); }
 inline void Mat4x4Copy(MATRIX4X4_PTR dest, const MATRIX4X4_PTR src)				{ memcpy((void *)dest->M, (const void *)src->M, sizeof(MATRIX4X4)); }
 MATRIX4X4 Mat4x4Transpose(const MATRIX4X4_PTR mt);

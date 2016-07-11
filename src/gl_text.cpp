@@ -132,7 +132,8 @@ float CGLFont::TextWidth(const char *strText) {
 // Delete method --------------------------------------------------------------+
 void CGLFont::Delete() {
 	glDeleteLists(m_iList, 256);
-	if (m_FontMode = fmTexture) glDeleteTextures(1, &m_iTexture);
+	if (m_FontMode == fmTexture) 
+		glDeleteTextures(1, &m_iTexture);
 
 	m_FontMode = fmNone;
 }
