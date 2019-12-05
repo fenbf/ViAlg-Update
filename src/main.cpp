@@ -58,12 +58,13 @@ bool g_bInfo;
 bool g_bRegenerate;
 
 // algorithms:
-#define NUM_ALGORITHMS 5
+#define NUM_ALGORITHMS 6
 #define ABUBBLE_SORT 0
 #define ASHAKER_SORT 1
 #define ASELECTION_SORT 2
 #define AINSERTION_SORT 3
 #define ASHELL_SORT 4
+#define AQUICK_SORT 5
 
 CAlgorithm *g_Algorithms[NUM_ALGORITHMS];
 CAlgManager *g_algManager;
@@ -162,6 +163,7 @@ void InitApp() {
 	g_Algorithms[ASELECTION_SORT] = new CSelectionSortAlgorithm();
 	g_Algorithms[AINSERTION_SORT] = new CInsertionSortAlgorithm();
 	g_Algorithms[ASHELL_SORT] = new CShellSortAlgorithm();
+	g_Algorithms[AQUICK_SORT] = new CQuickSortAlgorithm();
 	g_algManager = new CAlgManager();
 	g_algManager->SetTempo(3000.0);
 	g_algManager->SetNumOfElements(100);
@@ -263,6 +265,7 @@ void CleanUp() {
 	delete g_Algorithms[ASELECTION_SORT];
 	delete g_Algorithms[AINSERTION_SORT];
 	delete g_Algorithms[ASHELL_SORT];
+	delete g_Algorithms[AQUICK_SORT];
 
 	delete g_avSystem;
 	delete g_algManager;
@@ -504,6 +507,12 @@ bool OnMenuCommand(WORD iId, HMENU hMenu) {
 				g_algManager->RunAgain();
 				break;
 			}
+		case ID_METHOD_QUICKSORT: {
+			g_algManager->SetAlgorithm(g_Algorithms[AQUICK_SORT]);
+			if (g_bRegenerate) g_algManager->RegenerateData();
+			g_algManager->RunAgain();
+			break;
+		}
 		case ID_DATAORDER_SORTED: { 
 			    g_algManager->GenerateData(doSorted); 
 				g_algManager->RunAgain(); 

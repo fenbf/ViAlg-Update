@@ -12,6 +12,7 @@
 #include "av_data.h"
 #include "ctimer.h"
 #include "clog.h"
+#include <stack>
 
 // the CAlgorithm class -------------------------------------------------------+
 class CAlgorithm {
@@ -136,9 +137,12 @@ public:
 	void Stop();
 private:
 	CViArray<float>* m_viArray;
-	int m_i, m_j;       // loop iterators
+	int m_l;
 	int m_h;
-	float m_fValue;
+	std::stack<int> m_stack;
+	float m_valPartition;
+	int m_indexPartition;
+	int m_iter;
 };
 
 // the CAlgManager class ------------------------------------------------------+

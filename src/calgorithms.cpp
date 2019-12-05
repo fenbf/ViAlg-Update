@@ -441,11 +441,7 @@ void CShellSortAlgorithm::Stop() {
 //	}
 //}
 
-CQuickSortAlgorithm::CQuickSortAlgorithm() :
-	m_i(0),
-	m_j(0),
-	m_h(0),
-	m_fValue(0.0f)
+CQuickSortAlgorithm::CQuickSortAlgorithm()
 {
 	m_viArray = NULL;
 	sprintf_s(m_strName, "Quick Sort");
@@ -461,11 +457,14 @@ CQuickSortAlgorithm::~CQuickSortAlgorithm() {
 void CQuickSortAlgorithm::Init(CViData* vData) {
 	m_viArray = dynamic_cast <CViArray<float>*>(vData);
 
-	for (m_h = 1; m_h < m_viArray->GetSize() / 9; m_h = 3 * m_h + 1);
-	m_i = m_h;
-	m_j = m_h;
-	m_fValue = (*m_viArray)[m_i];
-	m_viArray->SetSection(m_i, m_viArray->GetSize() - 1);
+	m_l = 0;
+	m_h = m_viArray->GetSize() - 1;
+
+	m_valPartition = (*m_viArray)[m_h];
+	m_iter = 0;
+	m_indexPartition = -1;
+
+	m_viArray->SetSection(0, m_h);
 	CAlgorithm::ZeroStats();
 	m_bRunning = true;
 }
@@ -473,38 +472,54 @@ void CQuickSortAlgorithm::Init(CViData* vData) {
 // the Step method ------------------------------------------------------------+
 void CQuickSortAlgorithm::Step() {
 	if (!m_bRunning) return;
-  
+
 	CAlgorithm::NextIteration();
 
-	if (m_j >= m_h && CAlgorithm::IsBigger((*m_viArray)[m_j - m_h], m_fValue)) {
-		(*m_viArray)[m_j] = (*m_viArray)[m_j - m_h];
-		CAlgorithm::NextChange();
-
-		m_j -= m_h;
+	if (m_iter < m_h)
+	{
+		if (CAlgorithm::IsBigger(m_valPartition, (*m_viArray)[m_iter]))
+		{
+			m_indexPartition++;
+			CAlgorithm::Exchange((*m_viArray)[m_indexPartition], (*m_viArray)[m_iter]);
+		}
+		m_iter++;
 		return;
 	}
+	
+	// (m_iterPartition == m_h) // finish partition...
+	m_indexPartition++;
+	CAlgorithm::Exchange((*m_viArray)[m_indexPartition], (*m_viArray)[m_h]);
 
-	(*m_viArray)[m_j] = m_fValue;
-	CAlgorithm::NextChange();
-	++m_i;
-
-	if (m_i >= m_viArray->GetSize()) {
-		m_h /= 3;
-		if (m_h < 1) { m_bRunning = false; return; }
-		m_i = m_h;
+	if (m_indexPartition - 1 > m_l)
+	{
+		m_stack.push(m_l);
+		m_stack.push(m_indexPartition - 1);
 	}
 
-	m_j = m_i;
-	m_fValue = (*m_viArray)[m_i];
-	m_viArray->SetSection(m_i, m_viArray->GetSize() - 1);
+	if (m_indexPartition + 1 < m_h)
+	{
+		m_stack.push(m_indexPartition + 1);
+		m_stack.push(m_h);
+	}
 
-	sprintf_s(m_strName, "Shell Sort - %d sorting", m_h);
+	if (m_stack.empty())
+		m_bRunning = false;
+	else
+	{
+		m_h = m_stack.top();
+		m_stack.pop();
+		m_l = m_stack.top();
+		m_stack.pop();
+
+		m_iter = m_l;
+		m_indexPartition = m_iter - 1;
+		m_valPartition = (*m_viArray)[m_h];
+		m_viArray->SetSection(m_l, m_h);
+	}
 }
 
 // the stop method ------------------------------------------------------------+
 void CQuickSortAlgorithm::Stop() {
-	m_i = 0;
-	m_j = 1;
 	m_viArray->SetSection(-1, -1);
 	m_bRunning = false;
 }

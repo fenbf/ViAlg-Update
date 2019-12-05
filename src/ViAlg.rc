@@ -67,6 +67,7 @@ BEGIN
             MENUITEM "Selection Sort",              ID_METHOD_SELECTIONSORT
             MENUITEM "Insertion Sort",              ID_METHOD_INSERTIONSORT
             MENUITEM "Shell Sort",                  ID_METHOD_SHELLSORT
+            MENUITEM "Quick Sort",                  ID_METHOD_QUICKSORT
         END
         POPUP "Data Order"
         BEGIN
