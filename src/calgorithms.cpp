@@ -269,14 +269,14 @@ void CInsertionSortAlgorithm::Step() {
 	if (m_j > 0 && CAlgorithm::IsBigger((*m_viArray)[m_j-1], m_fValue)) {
 		CAlgorithm::NextIteration();
 		(*m_viArray)[m_j] = (*m_viArray)[m_j-1];
-		CAlgorithm::NexChange();
+		CAlgorithm::NextChange();
 		
 		--m_j;
 		return;
 	}
 	
 	(*m_viArray)[m_j] = m_fValue;
-	CAlgorithm::NexChange();
+	CAlgorithm::NextChange();
 	++m_i;
 
 	if (m_i >= m_viArray->GetSize()) { m_bRunning = false; return; }
@@ -348,14 +348,14 @@ void CShellSortAlgorithm::Step() {
 
 	if (m_j >= m_h && CAlgorithm::IsBigger((*m_viArray)[m_j-m_h], m_fValue)) {
 		(*m_viArray)[m_j] = (*m_viArray)[m_j-m_h];
-		CAlgorithm::NexChange();
+		CAlgorithm::NextChange();
 		
 		m_j-=m_h;
 		return;
 	}
 	
 	(*m_viArray)[m_j] = m_fValue;
-	CAlgorithm::NexChange();
+	CAlgorithm::NextChange();
 	++m_i;
 
 	if (m_i >= m_viArray->GetSize()) {
@@ -373,6 +373,136 @@ void CShellSortAlgorithm::Step() {
 
 // the stop method ------------------------------------------------------------+
 void CShellSortAlgorithm::Stop() {
+	m_i = 0;
+	m_j = 1;
+	m_viArray->SetSection(-1, -1);
+	m_bRunning = false;
+}
+
+/*-----------------------------------------------------------------------------+
+|               Implementation of the CQuickSortAlgorithm class               |
++-----------------------------------------------------------------------------*/
+
+// from https://www.geeksforgeeks.org/iterative-quick-sort/
+///* This function is same in both iterative and recursive*/
+//int partition(int arr[], int l, int h)
+//{
+//	int x = arr[h];
+//	int i = (l - 1);
+//
+//	for (int j = l; j <= h - 1; j++) {
+//		if (arr[j] <= x) {
+//			i++;
+//			swap(&arr[i], &arr[j]);
+//		}
+//	}
+//	swap(&arr[i + 1], &arr[h]);
+//	return (i + 1);
+//}
+//
+///* A[] --> Array to be sorted,
+//l --> Starting index,
+//h --> Ending index */
+//void quickSortIterative(int arr[], int l, int h)
+//{
+//	// Create an auxiliary stack 
+//	int stack[h - l + 1];
+//
+//	// initialize top of stack 
+//	int top = -1;
+//
+//	// push initial values of l and h to stack 
+//	stack[++top] = l;
+//	stack[++top] = h;
+//
+//	// Keep popping from stack while is not empty 
+//	while (top >= 0) {
+//		// Pop h and l 
+//		h = stack[top--];
+//		l = stack[top--];
+//
+//		// Set pivot element at its correct position 
+//		// in sorted array 
+//		int p = partition(arr, l, h);
+//
+//		// If there are elements on left side of pivot, 
+//		// then push left side to stack 
+//		if (p - 1 > l) {
+//			stack[++top] = l;
+//			stack[++top] = p - 1;
+//		}
+//
+//		// If there are elements on right side of pivot, 
+//		// then push right side to stack 
+//		if (p + 1 < h) {
+//			stack[++top] = p + 1;
+//			stack[++top] = h;
+//		}
+//	}
+//}
+
+CQuickSortAlgorithm::CQuickSortAlgorithm() :
+	m_i(0),
+	m_j(0),
+	m_h(0),
+	m_fValue(0.0f)
+{
+	m_viArray = NULL;
+	sprintf_s(m_strName, "Quick Sort");
+
+	g_Log.AddMsg(lmNormal, "%s initialisation", typeid(*this).name());
+}
+
+CQuickSortAlgorithm::~CQuickSortAlgorithm() {
+	g_Log.AddMsg(lmNormal, "%s clean up", typeid(*this).name());
+}
+
+// the Init method ------------------------------------------------------------+
+void CQuickSortAlgorithm::Init(CViData* vData) {
+	m_viArray = dynamic_cast <CViArray<float>*>(vData);
+
+	for (m_h = 1; m_h < m_viArray->GetSize() / 9; m_h = 3 * m_h + 1);
+	m_i = m_h;
+	m_j = m_h;
+	m_fValue = (*m_viArray)[m_i];
+	m_viArray->SetSection(m_i, m_viArray->GetSize() - 1);
+	CAlgorithm::ZeroStats();
+	m_bRunning = true;
+}
+
+// the Step method ------------------------------------------------------------+
+void CQuickSortAlgorithm::Step() {
+	if (!m_bRunning) return;
+  
+	CAlgorithm::NextIteration();
+
+	if (m_j >= m_h && CAlgorithm::IsBigger((*m_viArray)[m_j - m_h], m_fValue)) {
+		(*m_viArray)[m_j] = (*m_viArray)[m_j - m_h];
+		CAlgorithm::NextChange();
+
+		m_j -= m_h;
+		return;
+	}
+
+	(*m_viArray)[m_j] = m_fValue;
+	CAlgorithm::NextChange();
+	++m_i;
+
+	if (m_i >= m_viArray->GetSize()) {
+		m_h /= 3;
+		if (m_h < 1) { m_bRunning = false; return; }
+		m_i = m_h;
+	}
+
+	m_j = m_i;
+	m_fValue = (*m_viArray)[m_i];
+	m_viArray->SetSection(m_i, m_viArray->GetSize() - 1);
+
+	sprintf_s(m_strName, "Shell Sort - %d sorting", m_h);
+}
+
+// the stop method ------------------------------------------------------------+
+void CQuickSortAlgorithm::Stop() {
 	m_i = 0;
 	m_j = 1;
 	m_viArray->SetSection(-1, -1);

@@ -35,7 +35,7 @@ public:
 	template <class T> static bool IsBigger(T &a, T &b) { ++m_iComparisions; return (a > b); }
 	template <class T> static bool IsLittler(T &a, T &b) { ++m_iComparisions; return (a < b); }
 	static void NextIteration() { ++m_iIterations; }
-	static void NexChange() { ++m_iExchanges; }
+	static void NextChange() { ++m_iExchanges; }
 	
 	static int GetNumOfComparisions() { return m_iComparisions; }
 	static int GetNumOfExchanges() { return m_iExchanges; }
@@ -120,6 +120,22 @@ public:
 	void Stop();
 private:
 	CViArray<float> *m_viArray;
+	int m_i, m_j;       // loop iterators
+	int m_h;
+	float m_fValue;
+};
+
+// the CShellSortAlgorithm class ------------------------------------------+
+class CQuickSortAlgorithm : public CAlgorithm {
+public:
+	CQuickSortAlgorithm();
+	~CQuickSortAlgorithm();
+
+	void Init(CViData* viData);
+	void Step();
+	void Stop();
+private:
+	CViArray<float>* m_viArray;
 	int m_i, m_j;       // loop iterators
 	int m_h;
 	float m_fValue;
