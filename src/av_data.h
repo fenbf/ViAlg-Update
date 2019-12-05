@@ -33,13 +33,13 @@ template <class T>
 class CViArray : public CViData {
 public:
 	CViArray(int iSize);
-	CViArray(): m_iLast(0), m_iLast2(-1), m_iL(-1), m_iR(-1) { }
+	CViArray(): m_iLast(-1), m_iLast2(-1), m_iL(-1), m_iR(-1) { }
 	~CViArray();
 
 	void Render(CAVSystem *avSystem);
 
 	void Generate(DataOrder dOrder);
-	void Resize(int iSize) { m_vArray.resize(iSize); m_iLast2 = -1; }
+	void Resize(int iSize) { m_vArray.resize(iSize); m_iLast = -1; m_iLast2 = -1; m_vCurrPos = m_vArray; }
 	void SetSection(int iLeft, int iRight) { m_iL = iLeft; m_iR = iRight; }
 	void SetAdditionalMark(int iId) { m_iLast2 = iId; }
 	int GetSize() { return (int)m_vArray.size(); }
@@ -49,8 +49,9 @@ public:
 	void Func(T obj);
 private:
 	std::vector<T> m_vArray;
-	int m_iLast;
-	int m_iLast2;
+	std::vector<T> m_vCurrPos;
+	int m_iLast;			// last accessed element
+	int m_iLast2;			// additional accesed element
 	int m_iL, m_iR;         // highlighted section - left and right
 };
 
@@ -62,8 +63,9 @@ private:
 template <class T>
 CViArray<T>::CViArray(int iSize) {
 	m_vArray.resize(iSize);
-	m_iLast = 0;
-	m_iLast2 = 0;
+	m_vCurrPos = m_vArray;
+	m_iLast = -1;
+	m_iLast2 = -1;
 	m_iR = -1;
 	m_iL = -1;
 }
@@ -81,9 +83,12 @@ void CViArray<T>::Render(CAVSystem *avSystem) {
 	avSystem->BeginDrawing(1.0, (int)m_vArray.size());
 	for (int i = 0; i < (int)m_vArray.size(); ++i) {
         ct = ctNormal;
+
+		m_vCurrPos[i] += (m_vArray[i] - m_vCurrPos[i]) * 0.1f;
+
 		if (i >= m_iL && i <= m_iR) ct = ctHighlighted;
 		if (i == m_iLast || i == m_iLast2) ct = ctMarked;
-		avSystem->DrawDiagramBlock((double)m_vArray[i], ct);
+		avSystem->DrawDiagramBlock((double)m_vCurrPos[i], ct);
 	}
 	avSystem->EndDrawing();
 }
@@ -120,6 +125,7 @@ void CViArray<T>::Generate(DataOrder dOrder) {
 		}
 	}
 	m_iLast2 = -1;
+	m_vCurrPos = m_vArray;
 }
 
 // the [] operator ------------------------------------------------------------+

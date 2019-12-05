@@ -21,7 +21,7 @@ CAVSystem::CAVSystem():
     m_bType(btBox),
 	m_vCol(0.2f, 0.4f, 0.9f),
 	m_vColMarked(0.2f, 0.9f, 0.2f),
-	m_vColHighlighted(0.3f, 0.4f, 0.9f),
+	m_vColHighlighted(0.6f, 0.6f, 0.95f),
 	m_iTex(0),
 	m_bTextured(false),
 	m_bDrawing(false),
@@ -65,7 +65,7 @@ void CAVSystem::DrawDiagramBlock(double fValue, ColorType cType) {
 		case btPoint: {
 			glPushMatrix();
 			    glTranslatef(0.0f, m_vSizeAsp.y*(float)fValue, 0.0f);
-				DrawSphere(m_vSizeAsp.x*0.75f, m_vSizeAsp.x*0.75f, m_vSizeAsp.x*0.75f, m_iLod/2, m_iLod/3);
+				DrawSphere(m_vSizeAsp.x*0.75f, m_vSizeAsp.x*0.75f, m_vSizeAsp.x*0.75f, m_iLod, m_iLod);
 			glPopMatrix();
 			break;
 			}
@@ -108,6 +108,7 @@ void CAVSystem::BeginDrawing(double fMaxData, int nCount)
 	if (nCount <= 150) m_iLod = 8;
 	if (nCount <= 100) m_iLod = 12;
 	if (nCount <= 50) m_iLod = 16;
+	if (nCount <= 30) m_iLod = 32;
 
 	glPushMatrix();
 	if (m_bHoriz == true) glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
