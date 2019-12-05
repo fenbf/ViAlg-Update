@@ -1,4 +1,4 @@
-##ViAlg - Algorithms Visualization
+## ViAlg - Sorting Algorithms Visualization
 
 ViAlg is my old project, written on studies. (around 2006)
 Now I'm trying to refresh it.
