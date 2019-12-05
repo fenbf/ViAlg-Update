@@ -29,12 +29,12 @@ const char LogColors[3][7] = { "000000",    // for lmNormal
 class CLog {
 public:
 	CLog();
-	CLog::CLog(char *szFileName);
+	CLog(const char *szFileName);
 	~CLog();
 
 	// methods:
 	bool Init(const char *szFileName);
-	void AddMsg(LOG_MODE lmMode, char *szMsg, ...);
+	void AddMsg(LOG_MODE lmMode, const char *szMsg, ...);
 	
 	inline void Enable() { m_bEnabled = true; }
 	inline void Disable() { m_bEnabled = false; }

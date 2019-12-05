@@ -150,7 +150,7 @@ bool CGLApp::Init(WORD hMenu, bool (*procCommand)(WORD, HMENU), WORD hIcon) {
 		PFD_SUPPORT_OPENGL |						// Format Must Support OpenGL
 		PFD_DOUBLEBUFFER,							// Must Support Double Buffering
 		PFD_TYPE_RGBA,								// Request An RGBA Format
-		m_iBpp,										// Select Our Color Depth
+		static_cast<BYTE>(m_iBpp),					// Select Our Color Depth
 		0, 0, 0, 0, 0, 0,							// Color Bits Ignored
 		0,											// No Alpha Buffer
 		0,											// Shift Bit Ignored

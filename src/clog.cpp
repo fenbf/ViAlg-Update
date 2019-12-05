@@ -38,7 +38,7 @@ CLog::CLog():
 }
 
 // constructor 2:
-CLog::CLog(char *szFileName)
+CLog::CLog(const char *szFileName)
 {
 	Init(szFileName);
 }
@@ -112,7 +112,7 @@ bool CLog::Init(const char *szFileName) {
 | Return value:																   |
 |    none								                                       |
 +-----------------------------------------------------------------------------*/
-void CLog::AddMsg(LOG_MODE lmMode, char *szMsg, ...) {
+void CLog::AddMsg(LOG_MODE lmMode, const char *szMsg, ...) {
 	if (m_bEnabled == false)
 		return;
 	

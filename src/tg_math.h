@@ -17,17 +17,12 @@
 #ifndef TG_MATH_HPP
 	#define TG_MATH_HPP
 	
+
+// #future: think about replacing that math lib with glm maybe?
+
 #include <cmath>
 #include <cassert>
 #include <cstring>			// for such functions as memcpy...
-
-// for convertions from double to float ---------------------------------------+
-#define fsin(x)  (float)sin(x)
-#define fcos(x)  (float)cos(x)
-#define ftan(x)  (float)tan(x)
-#define fasin(x) (float)asin(x)
-#define facos(x) (float)acos(x)
-#define fsqrt(x) (float)sqrt(x)
 
 #ifndef ABS
 	#define ABS(x) ( (x) < 0 ? -(x) : (x) )
@@ -517,7 +512,7 @@ float FastDistance3d(float fx, float fy, float fz);
 
 // Vector 2D:
 inline VECTOR2D Vec2dCalc(const POINT2D_PTR p1, const POINT2D_PTR p2)			{ return VECTOR2D(p2->x - p1->x, p2->y - p1->y); }
-inline float Vec2dLength(const VECTOR2D_PTR v)									{ return fsqrt(v->x*v->x + v->y*v->y); }
+inline float Vec2dLength(const VECTOR2D_PTR v)									{ return sqrtf(v->x*v->x + v->y*v->y); }
 inline float Vec2dLength2(const VECTOR2D_PTR v)									{ return (v->x*v->x + v->y*v->y); }
 inline float Vec2dLengthFast(const VECTOR2D_PTR v)								{ return (float)FastDistance2d((int)v->x, (int)v->y); }
 inline float Vec2dDotProduct(const VECTOR2D_PTR v1, const VECTOR2D_PTR v2)		{ return (v1->x * v2->x + v1->y * v2->y); }
@@ -527,7 +522,7 @@ VECTOR2D Vec2dTransform(const VECTOR2D_PTR v, const MATRIX3X3_PTR mt);
 
 // Vector 3D:
 inline VECTOR3D Vec3dCalc(const POINT3D_PTR p1, const POINT3D_PTR p2)			{ return VECTOR3D(p2->x - p1->x, p2->y - p1->y, p2->z - p1->z); }
-inline float Vec3dLength(const VECTOR3D_PTR v)									{ return fsqrt(v->x*v->x + v->y*v->y +v->z*v->z); }
+inline float Vec3dLength(const VECTOR3D_PTR v)									{ return sqrtf(v->x*v->x + v->y*v->y +v->z*v->z); }
 inline float Vec3dLength2(const VECTOR3D_PTR v)									{ return (v->x*v->x + v->y*v->y +v->z*v->z); }
 inline float Vec3dLengthFast(const VECTOR3D_PTR v)								{ return FastDistance3d(v->x, v->y, v->z); }
 inline float Vec3dDotProduct(const VECTOR3D_PTR v1, const VECTOR3D_PTR v2)		{ return (v1->x*v2->x + v1->y*v2->y + v1->z*v2->z); }
@@ -538,7 +533,7 @@ VECTOR3D Vec3dTransform(const VECTOR3D_PTR v, const MATRIX4X4_PTR mt);
 
 // Vector 4D:
 inline VECTOR4D Vec4dCalc(const POINT4D_PTR p1, const POINT4D_PTR p2)			{ return VECTOR4D(p2->x - p1->x, p2->y - p1->y, p2->z - p1->z, 1.0f); }
-inline float Vec4dLength(const VECTOR4D_PTR v)									{ return fsqrt(v->x*v->x + v->y*v->y +v->z*v->z); }
+inline float Vec4dLength(const VECTOR4D_PTR v)									{ return sqrtf(v->x*v->x + v->y*v->y +v->z*v->z); }
 inline float Vec4dLength2(const VECTOR3D_PTR v)									{ return (v->x*v->x + v->y*v->y +v->z*v->z); }
 inline float Vec4dLengthFast(const VECTOR3D_PTR v)								{ return FastDistance3d(v->x, v->y, v->z); }
 inline float Vec4dDotProduct(const VECTOR4D_PTR v1, const VECTOR4D_PTR v2)		{ return (v1->x*v2->x + v1->y*v2->y + v1->z*v2->z); }
@@ -574,7 +569,7 @@ int Mat3x3Inverse(const MATRIX3X3_PTR mt, MATRIX3X3_PTR out);
 inline MATRIX3X3 Mat3x3Translation(float x, float y)							{ return MATRIX3X3(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, x, y, 1.0f); } 
 inline void Mat3x3AddTranslation(const MATRIX3X3_PTR m, float x, float y)		{ m->M20 += x; m->M21 += y; }
 inline MATRIX3X3 Mat3x3Scaling(float sx, float sy)								{ return MATRIX3X3(sx, 0.0f, 0.0f, 0.0f, sy, 0.0f, 0.0f, 0.0f, 1.0f); }
-inline MATRIX3X3 Mat3x3Rotation(float a)										{ return MATRIX3X3(fcos(a), fsin(a), 0.0f, -fsin(a), fcos(a), 0.0f, 0.0f, 0.0f, 1.0f); }
+inline MATRIX3X3 Mat3x3Rotation(float a)										{ return MATRIX3X3(cosf(a), sinf(a), 0.0f, -sinf(a), cosf(a), 0.0f, 0.0f, 0.0f, 1.0f); }
 MATRIX3X3 Mat3x3Transformation(float a, float sx, float sy,  float x, float y);
 
 // Matrix 4x4:
@@ -597,7 +592,7 @@ MATRIX4X4 Mat4x4Transformation(float rx, float ry, float rz,
 							   float x, float y, float z);
 
 // Quaternions:
-inline float QuaternionNorm(const QUATERNION_PTR q)								{ return ((float)sqrt(q->w*q->w + q->x*q->x + q->y*q->y + q->z*q->z)); }
+inline float QuaternionNorm(const QUATERNION_PTR q)								{ return (sqrtf(q->w*q->w + q->x*q->x + q->y*q->y + q->z*q->z)); }
 inline float QuaternionNorm2(const QUATERNION_PTR q)							{ return ((q->w*q->w + q->x*q->x + q->y*q->y + q->z*q->z)); }
 void QuaternionNormalize(const QUATERNION_PTR q);
 inline QUATERNION QuaternionConjugate(const QUATERNION_PTR q)					{ return QUATERNION(q->w, -q->x, -q->y, -q->z); }

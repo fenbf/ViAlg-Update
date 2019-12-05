@@ -66,9 +66,6 @@ CViArray<T>::CViArray(int iSize) {
 	m_iLast2 = 0;
 	m_iR = -1;
 	m_iL = -1;
-	m_iE1 = -1;
-	m_iE2 = -1;
-	m_bWasExchanged = false;
 }
 
 // destructor:
@@ -81,7 +78,7 @@ CViArray<T>::~CViArray() {
 template <class T>
 void CViArray<T>::Render(CAVSystem *avSystem) {
 	ColorType ct;
-	avSystem->BeginDrawing(m_vArray.begin(), m_vArray.end(), 1.0, (int)m_vArray.size());
+	avSystem->BeginDrawing(1.0, (int)m_vArray.size());
 	for (int i = 0; i < (int)m_vArray.size(); ++i) {
         ct = ctNormal;
 		if (i >= m_iL && i <= m_iR) ct = ctHighlighted;

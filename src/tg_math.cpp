@@ -318,7 +318,7 @@ VECTOR4D Vec4dTransform(const VECTOR4D_PTR v, const MATRIX4X4_PTR mt)
 +-----------------------------------------------------------------------------*/
 POINT2D Polar2dToPoint2d(const POLAR2D_PTR p)
 {
-	return POINT2D(p->r*fcos(p->theta), p->r*fsin(p->theta));
+	return POINT2D(p->r*cosf(p->theta), p->r*sinf(p->theta));
 }
 
 /*-----------------------------------------------------------------------------+
@@ -328,7 +328,7 @@ POLAR2D Point2dToPolar2d(const POINT2D_PTR p)
 {
 	POLAR2D buf;
 	buf.r = Vec2dLength(p);
-	buf.theta = (float)atan(p->y/p->x);		 // division by 0 may happen!
+	buf.theta = atanf(p->y/p->x);		 // division by 0 may happen!
 	return buf;
 }
 
@@ -340,11 +340,11 @@ POINT3D Spherical3dToPoint3d(const SPHERICAL3D_PTR s)
 	POINT3D pt;
 	float r;
 
-	r = s->p*fsin(s->phi);
-	pt.z = s->p*fcos(s->phi);
+	r = s->p*sinf(s->phi);
+	pt.z = s->p*cosf(s->phi);
 
-	pt.x = r*fcos(s->theta);
-	pt.y = r*fsin(s->theta);
+	pt.x = r*cosf(s->theta);
+	pt.y = r*sinf(s->theta);
 	return pt;
 }
 
@@ -357,9 +357,9 @@ SPHERICAL3D Point3dToSpherical3d(const POINT3D_PTR p)
 
 	sph.p = Vec3dLength(p);
 
-	sph.theta = (float)atan(p->y/p->x);
+	sph.theta = atanf(p->y/p->x);
 
-	float r = sph.p*fsin(sph.phi);
+	float r = sph.p*sinf(sph.phi);
 
 	sph.phi   = asinf(r/sph.p);
 	
@@ -371,7 +371,7 @@ SPHERICAL3D Point3dToSpherical3d(const POINT3D_PTR p)
 +-----------------------------------------------------------------------------*/
 POINT3D Cylindrical3dToPoint3d(const CYLINDRICAL3D_PTR s)
 {
-	return POINT3D(s->r*fcos(s->theta), s->r*fsin(s->theta), s->z);
+	return POINT3D(s->r*cosf(s->theta), s->r*sinf(s->theta), s->z);
 }
 
 /*-----------------------------------------------------------------------------+
@@ -381,7 +381,7 @@ CYLINDRICAL3D Point3dToCylindrical3d(const POINT3D_PTR p)
 {
 	CYLINDRICAL3D c;
 	c.r = Vec3dLength(p);
-	c.theta = (float)atan(p->y/p->x);
+	c.theta = atanf(p->y/p->x);
 	c.z = p->z;
 	return c;
 }
@@ -446,8 +446,8 @@ int Mat3x3Inverse(const MATRIX3X3_PTR mt, MATRIX3X3_PTR out)
 +-----------------------------------------------------------------------------*/
 MATRIX3X3 Mat3x3Transformation(float a, float sx, float sy,  float x, float y)
 {
-	return MATRIX3X3(sx*fcos(a),  sy*fsin(a), 0.0f,
-					 sx*-fsin(a), sy*fcos(a), 0.0f,
+	return MATRIX3X3(sx*cosf(a),  sy*sinf(a), 0.0f,
+					 sx*-sinf(a), sy*cosf(a), 0.0f,
 					 sy*x,        sy*y,       1.0f);
 }
 
@@ -507,8 +507,8 @@ int Mat4x4Inverse(MATRIX4X4_PTR m, MATRIX4X4_PTR mi)
 +-----------------------------------------------------------------------------*/
 MATRIX4X4 Mat4x4RotationX(float ang)
 {
-	float s = fsin(ang);
-	float c = fcos(ang);
+	float s = sinf(ang);
+	float c = cosf(ang);
  	return MATRIX4X4(1.0f, 0.0f,  0.0f,  0.0f,
 		             0.0f, c,     s,     0.0f,
 					 0.0f, -s,    c,     0.0f,
@@ -520,8 +520,8 @@ MATRIX4X4 Mat4x4RotationX(float ang)
 +-----------------------------------------------------------------------------*/
 MATRIX4X4 Mat4x4RotationY(float ang)
 {
-	float s = fsin(ang);
-	float c = fcos(ang);
+	float s = sinf(ang);
+	float c = cosf(ang);
  	return MATRIX4X4(c,    0.0f, -s,   0.0f,
 		             0.0f, 1.0f, 0.0f, 0.0f, 
 					 s,    0.0f, c,    0.0f,
@@ -533,8 +533,8 @@ MATRIX4X4 Mat4x4RotationY(float ang)
 +-----------------------------------------------------------------------------*/
 MATRIX4X4 Mat4x4RotationZ(float ang)
 {
-	float s = fsin(ang);
-	float c = fcos(ang);
+	float s = sinf(ang);
+	float c = cosf(ang);
  	return MATRIX4X4(c,    s,    0.0f, 0.0f,
 		             -s,   c,    0.0f, 0.0f,
 					 0.0f, 0.0f, 1.0f, 0.0f,
@@ -553,8 +553,8 @@ MATRIX4X4 Mat4x4VectorRotation(float ang, const VECTOR3D_PTR vn)
 	float x, y, z;
 	float xSq, ySq, zSq;
 
-	sinA = fsin(ang);
-	cosA = fcos(ang);
+	sinA = sinf(ang);
+	cosA = cosf(ang);
 	invCosA = 1.0f - cosA;
 
 	x = vn->x;
@@ -606,7 +606,7 @@ MATRIX4X4 Mat4x4Transformation(float rx, float ry, float rz,
 +-----------------------------------------------------------------------------*/
 void QuaternionNormalize(const QUATERNION_PTR q)
 {
-	float l = 1.0f/((float)fsqrt(q->w*q->w + q->x*q->x + q->y*q->y + q->z*q->z));
+	float l = 1.0f/(sqrtf(q->w*q->w + q->x*q->x + q->y*q->y + q->z*q->z));
 
 	q->w=q->w*l;
 	q->x=q->x*l;
@@ -631,9 +631,9 @@ QUATERNION QuaternionAxisRotation(const VECTOR3D_PTR axis, float rot)
 {
 	float t = 0.5f*rot;
 
-	float st = fsin(t);
+	float st = sinf(t);
 
-	return QUATERNION(fcos(t), st*axis->x, st*axis->y, st*axis->z);
+	return QUATERNION(cosf(t), st*axis->x, st*axis->y, st*axis->z);
 }
 
 /*-----------------------------------------------------------------------------+
@@ -641,13 +641,13 @@ QUATERNION QuaternionAxisRotation(const VECTOR3D_PTR axis, float rot)
 +-----------------------------------------------------------------------------*/
 QUATERNION QuaternionZYXRotation(float rx, float ry, float rz)
 {
-	float cos_z_2 = 0.5f*fcos(rz);
-	float cos_y_2 = 0.5f*fcos(ry);
-	float cos_x_2 = 0.5f*fcos(rx);
+	float cos_z_2 = 0.5f*cosf(rz);
+	float cos_y_2 = 0.5f*cosf(ry);
+	float cos_x_2 = 0.5f*cosf(rx);
 
-	float sin_z_2 = 0.5f*fsin(rz);
-	float sin_y_2 = 0.5f*fsin(ry);
-	float sin_x_2 = 0.5f*fsin(rx);
+	float sin_z_2 = 0.5f*sinf(rz);
+	float sin_y_2 = 0.5f*sinf(ry);
+	float sin_x_2 = 0.5f*sinf(rx);
 
 	return QUATERNION(cos_z_2*cos_y_2*cos_x_2 + sin_z_2*sin_y_2*sin_x_2,
 				cos_z_2*cos_y_2*sin_x_2 - sin_z_2*sin_y_2*cos_x_2,
@@ -660,9 +660,9 @@ QUATERNION QuaternionZYXRotation(float rx, float ry, float rz)
 +-----------------------------------------------------------------------------*/
 void QuaternionToVector3dAndAngle(const QUATERNION_PTR q, VECTOR3D_PTR axis, float &rot)
 {
-	rot = (float)acos(q->w);
+	rot = acosf(q->w);
 
-	float buf = 1.0f/fsin(rot);
+	float buf = 1.0f/sinf(rot);
 
 	axis->x = q->x*buf;
 	axis->y = q->y*buf;
@@ -789,8 +789,8 @@ void BuildSinCosTables()
 		// convert ang to radians
 		float theta = DegToRad((float)ang);
 
-		cos_look[ang] = fcos(theta);
-		sin_look[ang] = fsin(theta);
+		cos_look[ang] = cosf(theta);
+		sin_look[ang] = sinf(theta);
     }
 }
 

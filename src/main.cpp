@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include <exception>
-#include <typeinfo.h>
+#include <typeinfo>
 
 #include "cgl_app.h"
 #include "clog.h"
@@ -47,6 +47,8 @@ CGLLight g_Light;
 GLuint g_iTexFloor;
 GLuint g_iTexFrame;
 
+HANDLE hTimer = NULL;
+
 // switches:
 bool g_bLight;
 bool g_bTextured;
@@ -82,7 +84,7 @@ bool OnExit();
 /*-----------------------------------------------------------------------------+
 |                                    MAIN                                      |
 +-----------------------------------------------------------------------------*/
-int WINAPI WinMain(_In_ HINSTANCE current_in, _In_opt_ HINSTANCE prev_in, _In_ LPSTR cmdl, _In_ int n_show) {
+int WINAPI WinMain(HINSTANCE current_in, HINSTANCE prev_in, LPSTR cmdl, int n_show) {
 	
 	g_Log.Init("log.html");
 	try {
@@ -95,8 +97,14 @@ int WINAPI WinMain(_In_ HINSTANCE current_in, _In_opt_ HINSTANCE prev_in, _In_ L
 		return 1;
 	}
 
+	LARGE_INTEGER liDueTime;
+
+	liDueTime.QuadPart = -100000LL; // 1ms
+
 	int iMsg;
 	while (1) {
+		SetWaitableTimer(hTimer, &liDueTime, 0, NULL, NULL, 0);
+
 		iMsg = CGLApp::CheckWindowMessages();
 		
 		// Quit?
@@ -113,8 +121,11 @@ int WINAPI WinMain(_In_ HINSTANCE current_in, _In_opt_ HINSTANCE prev_in, _In_ L
 		UpdateAnimation();
 		RenderScene(); 
 
-		glFlush();
+		//glFlush();
 		SwapBuffers(g_glApp.GetHdc());
+
+		if (WaitForSingleObject(hTimer, INFINITE) != WAIT_OBJECT_0)
+			printf("WaitForSingleObject failed (%d)\n", GetLastError());
 	}
 
 	CleanUp();
@@ -130,8 +141,8 @@ int WINAPI WinMain(_In_ HINSTANCE current_in, _In_opt_ HINSTANCE prev_in, _In_ L
 +-----------------------------------------------------------------------------*/
 void InitApp() {	
 	CGLApp::m_iBpp = 32;
-	CGLApp::m_iWidth = 640;
-	CGLApp::m_iHeight = 480;
+	CGLApp::m_iWidth = 1024;
+	CGLApp::m_iHeight = 768;
 	CGLApp::m_bFullscreen = false;
 	sprintf_s(CGLApp::m_szTitle, "ViAlg");
 	
@@ -160,7 +171,7 @@ void InitApp() {
 	g_avSystem = new CAVSystem();
 	g_avSystem->SetMaxSize(5.0f, 1.0f, 1.0f);
 
-	g_iTexFloor = LoadTextureFromBmp("data\\f.bmp", GL_BGR_EXT, GL_LINEAR_MIPMAP_LINEAR);
+	g_iTexFloor = LoadTextureFromBmp("data\\checker64.bmp", GL_BGR_EXT, GL_LINEAR_MIPMAP_LINEAR);
 	g_iTexFrame = LoadTextureFromBmp("data\\frame.bmp", GL_BGR_EXT, GL_LINEAR_MIPMAP_LINEAR);
 
 	g_avSystem->SetDiagramBlockInfo(btBox, VECTOR3D(0.2f, 0.3f, 0.7f),       // normal color
@@ -189,6 +200,11 @@ void InitApp() {
 	g_Log.AddMsg(lmSuccess, "App's menu fixed!");
 
 	InitGL();
+
+	// Create an unnamed waitable timer.
+	hTimer = CreateWaitableTimer(NULL, TRUE, NULL);
+	if (NULL == hTimer)
+		throw exception("CreateWaitableTimer failed");
 
 	g_Log.AddMsg(lmSuccess, "App initialised!");
 }
@@ -584,7 +600,7 @@ bool OnMenuCommand(WORD iId, HMENU hMenu) {
 		case ID_FLOW_SETTOSLOW: { g_algManager->SetTempo(fTempoDelta); break; }
 		case ID_FLOW_SETTOFAST: { g_algManager->SetTempo(fTempoDelta*12); break; }
 		case ID_HELP_ABOUT: {
-				MessageBox(NULL, "Created by Bart \"Fen\" Filipek\n9th April 2006", "Info", MB_OK | MB_ICONQUESTION);
+				MessageBox(NULL, "Created by Bart \"Fen\" Filipek\n9th April 2006, Updated in December 2019", "Info", MB_OK | MB_ICONQUESTION);
 				break;
 			}
 	}

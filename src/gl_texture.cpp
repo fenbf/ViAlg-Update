@@ -14,7 +14,7 @@
 |  - format and filter as in OpenGL (fe. GL_RGB, GL_LINEAR, etc)               |
 | Returns index of the texture...                                              |
 +-----------------------------------------------------------------------------*/
-GLuint LoadTextureFromBmp(char *fname, GLenum format, GLuint filter)
+GLuint LoadTextureFromBmp(const char *fname, GLenum format, GLuint filter)
 {
 	HBITMAP hBmp;
 	BITMAP Bmp;
@@ -49,8 +49,8 @@ GLuint LoadTextureFromBmp(char *fname, GLenum format, GLuint filter)
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 	glBindTexture(GL_TEXTURE_2D, t);
 	
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	// create texture using appropriate filter
 	switch ( filter )
