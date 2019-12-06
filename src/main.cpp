@@ -60,17 +60,23 @@ bool g_bFloor;
 bool g_bInfo;
 bool g_bRegenerate;
 
-// #todo: make those fields not global so that they don't outlive the logger!
-std::vector<std::unique_ptr<CAlgorithm>> g_Algorithms; // #todo: make the vector const
-std::map<long, size_t> g_mapMenuIDToAlgIndex; // #todo: make the map const
+struct AppState {
+	explicit AppState(const CLog& logger);
+
+	const std::vector<std::shared_ptr<CAlgorithm>> m_Algorithms;
+	const std::map<WORD, size_t> m_mapMenuIDToAlgIndex;
+
+	CAlgManager m_algManager;
+	CAVSystem m_avSystem;
+};
 
 // functions' prototypes ------------------------------------------------------+
-void InitApp(const CLog &logger, CAlgManager& algManager, CAVSystem& avSystem);
+void InitApp(const CLog &logger, AppState& appState);
 void InitGL(const CLog& logger);
 void CleanUp(const CLog& logger);
 void ResizeGLScene(int iWidth, int iHeight, bool bView = false);
-void RenderScene(CAlgManager& algManager, CAVSystem& avSystem);
-void UpdateAnimation(CAlgManager& algManager);
+void RenderScene(AppState& appState);
+void UpdateAnimation(AppState& appState);
 void DrawFloor();
 bool ProcessKeyboard();
 bool OnMenuCommand(WORD iId, HMENU hMenu, std::any& param);
@@ -82,11 +88,10 @@ bool OnExit();
 int WINAPI WinMain(HINSTANCE current_in, HINSTANCE prev_in, LPSTR cmdl, int n_show) {
 	CLog logger{ "log.html" };
 
-	CAlgManager algManager{logger};
-	CAVSystem avSystem{ logger };
+	AppState appState{ logger };
 
 	try {
-		InitApp(logger, algManager, avSystem);
+		InitApp(logger, appState);
 	}
 	catch (const std::exception &e) {
 		logger.AddMsg(LogMode::Err, "Exception was thrown: type: %s - message: %s", typeid(e).name(), e.what());
@@ -116,8 +121,8 @@ int WINAPI WinMain(HINSTANCE current_in, HINSTANCE prev_in, LPSTR cmdl, int n_sh
 			
 		if (!ProcessKeyboard() && !OnExit()) break;
 
-		UpdateAnimation(algManager);
-		RenderScene(algManager, avSystem); 
+		UpdateAnimation(appState);
+		RenderScene(appState); 
 
 		//glFlush();
 		SwapBuffers(g_glApp.GetHdc());
@@ -131,13 +136,50 @@ int WINAPI WinMain(HINSTANCE current_in, HINSTANCE prev_in, LPSTR cmdl, int n_sh
 	return 0;
 }
 
+AppState::AppState(const CLog& logger) :
+	m_Algorithms{
+	std::make_shared<CBubbleSortAlgorithm>(logger),
+	std::make_shared<CShakerSortAlgorithm>(logger),
+	std::make_shared<CSelectionSortAlgorithm>(logger),
+	std::make_shared<CInsertionSortAlgorithm>(logger),
+	std::make_shared<CShellSortAlgorithm>(logger),
+	std::make_shared<CQuickSortAlgorithm>(logger)
+},
+m_mapMenuIDToAlgIndex{
+	{ ID_METHOD_BUBBLESORT, 0 },
+	{ ID_METHOD_SHAKERSORT, 1 },
+	{ ID_METHOD_SELECTIONSORT, 2 },
+	{ ID_METHOD_INSERTIONSORT, 3 },
+	{ ID_METHOD_SHELLSORT, 4 },
+	{ ID_METHOD_QUICKSORT, 5 }
+},
+m_algManager { logger},
+m_avSystem { logger}
+{
+	m_algManager.SetTempo(3000.0);
+	m_algManager.SetNumOfElements(100);
+	m_algManager.GenerateData(doSpecialRandomized);
+	m_algManager.SetAlgorithm(m_Algorithms[0].get());
+
+	m_avSystem.SetMaxSize(5.0f, 1.0f, 1.0f);
+
+	m_avSystem.SetDiagramBlockInfo(btBox, VECTOR3D(0.2f, 0.3f, 0.7f),       // normal color
+		VECTOR3D(0.2f, 1.0f, 0.2f),        // marked
+		VECTOR3D(0.4f, 0.6f, 0.99f));      // highlighted 
+	m_avSystem.SetOutlook(VECTOR3D(0.8f, 0.7f, 0.3f), g_iTexFrame);
+	m_avSystem.m_bTextured = false;
+	m_avSystem.m_bFrame = true;
+	m_avSystem.m_bHoriz = false;
+}
+
+
 /*-----------------------------------------------------------------------------+
 |                                  InitApp                                     |
 +------------------------------------------------------------------------------+
 | Description:																   |
 |    Initialises all of the application.                                       | 
 +-----------------------------------------------------------------------------*/
-void InitApp(const CLog& logger, CAlgManager& algManager, CAVSystem& avSystem) {
+void InitApp(const CLog& logger, AppState& appState) {
 	CGLApp::m_iBpp = 32;
 	CGLApp::m_iWidth = 1024;
 	CGLApp::m_iHeight = 768;
@@ -147,7 +189,7 @@ void InitApp(const CLog& logger, CAlgManager& algManager, CAVSystem& avSystem) {
 	if (!g_glApp.Init(IDR_MENU1, &OnMenuCommand)) throw std::runtime_error("Failed in initialising the Application");
 	else logger.AddMsg(LogMode::Success, "Main window of the application has been created!");
 
-	g_glApp.s_param = std::pair{ &algManager, &avSystem };
+	g_glApp.s_param = &appState;
 
 	if (!g_Timer.Init()) throw std::runtime_error("High Performance Timer not available!");
 	else logger.AddMsg(LogMode::Success, "High Performance Timer available!");
@@ -157,35 +199,8 @@ void InitApp(const CLog& logger, CAlgManager& algManager, CAVSystem& avSystem) {
     BuildSinCosTables();
 	srand((unsigned int)time(NULL));
 
-	g_Algorithms.emplace_back(new CBubbleSortAlgorithm(logger));
-	g_Algorithms.emplace_back(new CShakerSortAlgorithm(logger));
-	g_Algorithms.emplace_back(new CSelectionSortAlgorithm(logger));
-	g_Algorithms.emplace_back(new CInsertionSortAlgorithm(logger));
-	g_Algorithms.emplace_back(new CShellSortAlgorithm(logger));
-	g_Algorithms.emplace_back(new CQuickSortAlgorithm(logger));
-
-	g_mapMenuIDToAlgIndex[ID_METHOD_BUBBLESORT] = 0;
-	g_mapMenuIDToAlgIndex[ID_METHOD_SHAKERSORT] = 1;
-	g_mapMenuIDToAlgIndex[ID_METHOD_SELECTIONSORT] = 2;
-	g_mapMenuIDToAlgIndex[ID_METHOD_INSERTIONSORT] = 3;
-	g_mapMenuIDToAlgIndex[ID_METHOD_SHELLSORT] = 4;
-	g_mapMenuIDToAlgIndex[ID_METHOD_QUICKSORT] = 5;
-
-	algManager.SetTempo(3000.0);
-	algManager.SetNumOfElements(100);
-	algManager.GenerateData(doSpecialRandomized);
-	algManager.SetAlgorithm(g_Algorithms[0].get());
-
-	avSystem.SetMaxSize(5.0f, 1.0f, 1.0f);
-
 	g_iTexFloor = LoadTextureFromBmp("data\\checker64.bmp", GL_BGR_EXT, GL_LINEAR_MIPMAP_LINEAR);
 	g_iTexFrame = LoadTextureFromBmp("data\\frame.bmp", GL_BGR_EXT, GL_LINEAR_MIPMAP_LINEAR);
-
-	avSystem.SetDiagramBlockInfo(btBox, VECTOR3D(0.2f, 0.3f, 0.7f),       // normal color
-		                                  VECTOR3D(0.2f, 1.0f, 0.2f),        // marked
-										  VECTOR3D(0.4f, 0.6f, 0.99f));      // highlighted 
-	avSystem.SetOutlook(VECTOR3D(0.8f, 0.7f, 0.3f), g_iTexFrame);
-	avSystem.m_bTextured = false;
 
     // switches:
 	g_bLight = true;
@@ -196,9 +211,9 @@ void InitApp(const CLog& logger, CAlgManager& algManager, CAVSystem& avSystem) {
 	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_REFLECTION, MF_CHECKED);
 	g_bFloor = true;
 	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_FLOOR, MF_CHECKED);
-	avSystem.m_bFrame = true;
+	
 	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_FRAME, MF_CHECKED);
-	avSystem.m_bHoriz = false;
+	
 	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_HORIZ, MF_UNCHECKED);
 	g_bInfo = true;
 	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_INFO, MF_CHECKED);
@@ -300,7 +315,7 @@ void ResizeGLScene(int iWidth, int iHeight, bool bView) {
 /*-----------------------------------------------------------------------------+
 |                                RenderScene                                   |
 +-----------------------------------------------------------------------------*/
-void RenderScene(CAlgManager& algManager, CAVSystem& avSystem) {
+void RenderScene(AppState& appState) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); 
 	
 	if (g_bLight) glEnable(GL_LIGHTING);
@@ -338,7 +353,7 @@ void RenderScene(CAlgManager& algManager, CAVSystem& avSystem) {
 			//glLightfv(GL_LIGHT0, GL_POSITION, light_pos);		
 			glFrontFace(GL_CW);
 			glTranslatef(0.0f, 0.3f, 0.0);
-			algManager.Render(&avSystem);
+			appState.m_algManager.Render(&appState.m_avSystem);
 			glFrontFace(GL_CCW);
 		glPopMatrix();
 		glDisable(GL_CLIP_PLANE0);						// Disable Clip Plane For Drawing The Floor
@@ -359,7 +374,7 @@ void RenderScene(CAlgManager& algManager, CAVSystem& avSystem) {
 	glPushMatrix();
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTranslatef(0.0f, 0.3f, 0.0);
-	    algManager.Render(&avSystem);
+		appState.m_algManager.Render(&appState.m_avSystem);
 	glPopMatrix();
 
 	// draw text: 
@@ -368,10 +383,10 @@ void RenderScene(CAlgManager& algManager, CAVSystem& avSystem) {
 	        glColor3f(0.0f, 0.0f, 0.0f);
 		    glTextPrintf(&g_Font, 10.0f, 20.0f, "Fps: %2.3f", g_Timer.GetFps());
 			if (g_Timer.IsFreezed()) glTextout(&g_Font, "Algorithm paused", 500.0f, 20.0f);
-			else glTextPrintf(&g_Font, 500.0f, 20.0f, "Update tempo: %3.1f", algManager.GetTempo()/100.0);
-		    glTextPrintf(&g_Font, 10.0f, 34.0f, "Algorithm: %s", algManager.GetAlgorithmName());
-		    glTextPrintf(&g_Font, 10.0f, 48.0f, "Num of Elements: %d", algManager.GetNumOfElements());
-			glTextPrintf(&g_Font, 10.0f, 62.0f, "Elements order: %s", algManager.GetDataOrderName());
+			else glTextPrintf(&g_Font, 500.0f, 20.0f, "Update tempo: %3.1f", appState.m_algManager.GetTempo()/100.0);
+		    glTextPrintf(&g_Font, 10.0f, 34.0f, "Algorithm: %s", appState.m_algManager.GetAlgorithmName());
+		    glTextPrintf(&g_Font, 10.0f, 48.0f, "Num of Elements: %d", appState.m_algManager.GetNumOfElements());
+			glTextPrintf(&g_Font, 10.0f, 62.0f, "Elements order: %s", appState.m_algManager.GetDataOrderName());
 		    glTextPrintf(&g_Font, 10.0f, 76.0f, "Comparisions: %d", CAlgorithm::GetNumOfComparisions());
 		    glTextPrintf(&g_Font, 10.0f, 90.0f, "Exchanges: %d", CAlgorithm::GetNumOfExchanges());
 			glTextPrintf(&g_Font, 10.0f, 104.0f, "Iterations: %d", CAlgorithm::GetNumOfIterations());
@@ -409,12 +424,12 @@ void DrawFloor()
 /*-----------------------------------------------------------------------------+
 |                              UpdateAnimation                                 |
 +-----------------------------------------------------------------------------*/
-void UpdateAnimation(CAlgManager& algManager) {
+void UpdateAnimation(AppState& appState) {
 	g_Timer.Update();
 
 	if (g_Timer.IsFreezed()) return;
 
-	algManager.Update();
+	appState.m_algManager.Update();
 }
 
 /*-----------------------------------------------------------------------------+
@@ -472,125 +487,125 @@ bool ProcessKeyboard() {
 | Returns "false" if user wants to exit                                        |
 +-----------------------------------------------------------------------------*/
 bool OnMenuCommand(WORD iId, HMENU hMenu, std::any& param) {
-	auto [pAlgManager, pAvSystem]  = std::any_cast<std::pair<CAlgManager*, CAVSystem*>>(param);
+	auto pAppState  = std::any_cast<AppState*>(param);
 
 	switch ( iId ) {
 		case ID_FILE_EXIT: return false;
-		case ID_DIAGRAMTYPE_POINTS:    { pAvSystem->SetBlockType(btPoint); break; }
-		case ID_DIAGRAMTYPE_BOXES:     { pAvSystem->SetBlockType(btBox); break; }
-	    case ID_DIAGRAMTYPE_PYRAMIDS:  { pAvSystem->SetBlockType(btPyramid); break; }
-	    case ID_DIAGRAMTYPE_CYLINDERS: { pAvSystem->SetBlockType(btCylinder); break; }
+		case ID_DIAGRAMTYPE_POINTS:    { pAppState->m_avSystem.SetBlockType(btPoint); break; }
+		case ID_DIAGRAMTYPE_BOXES:     { pAppState->m_avSystem.SetBlockType(btBox); break; }
+	    case ID_DIAGRAMTYPE_PYRAMIDS:  { pAppState->m_avSystem.SetBlockType(btPyramid); break; }
+	    case ID_DIAGRAMTYPE_CYLINDERS: { pAppState->m_avSystem.SetBlockType(btCylinder); break; }
 		case ID_ALGORITHM_RUNAGAIN:    { 
-			    if (g_bRegenerate) pAlgManager->RegenerateData(); 
-				pAlgManager->RunAgain(); 
-				break; 
-			}
+			if (g_bRegenerate) pAppState->m_algManager.RegenerateData(); 
+			pAppState->m_algManager.RunAgain();
+			break; 
+		}
 		case ID_METHOD_BUBBLESORT: 
 		case ID_METHOD_SHAKERSORT: 
 		case ID_METHOD_SELECTIONSORT: 
 		case ID_METHOD_INSERTIONSORT: 
 		case ID_METHOD_SHELLSORT: 
 		case ID_METHOD_QUICKSORT: {
-				pAlgManager->SetAlgorithm(g_Algorithms[g_mapMenuIDToAlgIndex[iId]].get());
-				if (g_bRegenerate) pAlgManager->RegenerateData();
-				pAlgManager->RunAgain();
-				break;
-			}
+			pAppState->m_algManager.SetAlgorithm(pAppState->m_Algorithms[pAppState->m_mapMenuIDToAlgIndex.at(iId)].get());
+			if (g_bRegenerate) pAppState->m_algManager.RegenerateData();
+			pAppState->m_algManager.RunAgain();
+			break;
+		}
 		case ID_DATAORDER_SORTED: { 
-				pAlgManager->GenerateData(doSorted);
-				pAlgManager->RunAgain();
-				break; 
-		    }
+			pAppState->m_algManager.GenerateData(doSorted);
+			pAppState->m_algManager.RunAgain();
+			break; 
+		}
 		case ID_DATAORDER_REVERSED: { 
-				pAlgManager->GenerateData(doReversed);
-				pAlgManager->RunAgain();
-				break; 
-			}
+			pAppState->m_algManager.GenerateData(doReversed);
+			pAppState->m_algManager.RunAgain();
+			break; 
+		}
 	    case ID_DATAORDER_RANDOMIZED: { 
-				pAlgManager->GenerateData(doRandomized);
-				pAlgManager->RunAgain();
-				break; 
-			}
+			pAppState->m_algManager.GenerateData(doRandomized);
+			pAppState->m_algManager.RunAgain();
+			break; 
+		}
 	    case ID_DATAORDER_SPECIALRANDOMIZED: { 
-				pAlgManager->GenerateData(doSpecialRandomized);
-				pAlgManager->RunAgain();
-				break; 
-			}
+			pAppState->m_algManager.GenerateData(doSpecialRandomized);
+			pAppState->m_algManager.RunAgain();
+			break; 
+		}
         case ID_DATAORDER_REGENERATE: {
 			    g_bRegenerate = !g_bRegenerate;
 				CheckMenuItem(hMenu, iId, (g_bRegenerate ? MF_CHECKED : MF_UNCHECKED));
 				break;
 			}
 		case ID_ELEMENTS_SETTO100: {
-				pAlgManager->SetNumOfElements(100);
-				pAlgManager->RunAgain();
-				break;
-			}
+			pAppState->m_algManager.SetNumOfElements(100);
+			pAppState->m_algManager.RunAgain();
+			break;
+		}
 		case ID_ELEMENTS_SETTO20: {
-			pAlgManager->SetNumOfElements(20);
-			pAlgManager->RunAgain();
-				break;
-			}
+			pAppState->m_algManager.SetNumOfElements(20);
+			pAppState->m_algManager.RunAgain();
+			break;
+		}
 	    case ID_ELEMENTS_SETTO200: {
-			pAlgManager->SetNumOfElements(200);
-			pAlgManager->RunAgain();
-				break;
-			}
+			pAppState->m_algManager.SetNumOfElements(200);
+			pAppState->m_algManager.RunAgain();
+			break;
+		}
 	    case ID_ELEMENTS_INCREASE: {
-			pAlgManager->SetNumOfElements(pAlgManager->GetNumOfElements()+iElementsDelta);
-			pAlgManager->RunAgain();
+			pAppState->m_algManager.SetNumOfElements(pAppState->m_algManager.GetNumOfElements()+iElementsDelta);
+			pAppState->m_algManager.RunAgain();
 				break;
 			}
 	    case ID_ELEMENTS_DECREASE: {
-			if (pAlgManager->GetNumOfElements() > iElementsMin)
-				pAlgManager->SetNumOfElements(pAlgManager->GetNumOfElements()-iElementsDelta);
-			pAlgManager->RunAgain();
+			if (pAppState->m_algManager.GetNumOfElements() > iElementsMin)
+				pAppState->m_algManager.SetNumOfElements(pAppState->m_algManager.GetNumOfElements()-iElementsDelta);
+			pAppState->m_algManager.RunAgain();
 			break;
 		}
 		case ID_VIEW_LIGHT: {
-			    g_bLight = !g_bLight;
-				CheckMenuItem(hMenu, iId, (g_bLight ? MF_CHECKED : MF_UNCHECKED));
-				break;
-			}
+			g_bLight = !g_bLight;
+			CheckMenuItem(hMenu, iId, (g_bLight ? MF_CHECKED : MF_UNCHECKED));
+			break;
+		}
 		case ID_VIEW_TEXTURED: {
-			    g_bTextured = !g_bTextured;
-				pAvSystem->m_bTextured = g_bTextured;
-				CheckMenuItem(hMenu, iId, (g_bTextured ? MF_CHECKED : MF_UNCHECKED));
-				break;
-			}
+			g_bTextured = !g_bTextured;
+			pAppState->m_avSystem.m_bTextured = g_bTextured;
+			CheckMenuItem(hMenu, iId, (g_bTextured ? MF_CHECKED : MF_UNCHECKED));
+			break;
+		}
 	    case ID_VIEW_REFLECTION: {
-			    g_bReflection = !g_bReflection;
-				CheckMenuItem(hMenu, iId, (g_bReflection ? MF_CHECKED : MF_UNCHECKED));
-				break;
-			}
+			g_bReflection = !g_bReflection;
+			CheckMenuItem(hMenu, iId, (g_bReflection ? MF_CHECKED : MF_UNCHECKED));
+			break;
+		}
 		case ID_VIEW_FLOOR: {
-			    g_bFloor = !g_bFloor;
-				CheckMenuItem(hMenu, iId, (g_bFloor ? MF_CHECKED : MF_UNCHECKED));
-				break;
-			}
+			g_bFloor = !g_bFloor;
+			CheckMenuItem(hMenu, iId, (g_bFloor ? MF_CHECKED : MF_UNCHECKED));
+			break;
+		}
 		case ID_VIEW_FRAME: {
-				pAvSystem->m_bFrame = !pAvSystem->m_bFrame;
-				CheckMenuItem(hMenu, iId, (pAvSystem->m_bFrame ? MF_CHECKED : MF_UNCHECKED));
-				break;
-			}
+			pAppState->m_avSystem.m_bFrame = !pAppState->m_avSystem.m_bFrame;
+			CheckMenuItem(hMenu, iId, (pAppState->m_avSystem.m_bFrame ? MF_CHECKED : MF_UNCHECKED));
+			break;
+		}
 		case ID_VIEW_HORIZ: {
-			pAvSystem->m_bHoriz = !pAvSystem->m_bHoriz;
-				CheckMenuItem(hMenu, iId, (pAvSystem->m_bHoriz ? MF_CHECKED : MF_UNCHECKED));
-				break;
-			}
+			pAppState->m_avSystem.m_bHoriz = !pAppState->m_avSystem.m_bHoriz;
+			CheckMenuItem(hMenu, iId, (pAppState->m_avSystem.m_bHoriz ? MF_CHECKED : MF_UNCHECKED));
+			break;
+		}
 		case ID_VIEW_INFO: {
-				g_bInfo = !g_bInfo;
-				CheckMenuItem(hMenu, iId, (g_bInfo? MF_CHECKED : MF_UNCHECKED));
-				break;
-			}
+			g_bInfo = !g_bInfo;
+			CheckMenuItem(hMenu, iId, (g_bInfo? MF_CHECKED : MF_UNCHECKED));
+			break;
+		}
 		case ID_FLOW_PAUSE: {
-				pAlgManager->SwapPause();
-				break;
-			}
-		case ID_FLOW_INCREASETEMPO: { pAlgManager->SetTempo(pAlgManager->GetTempo()+fTempoDelta); break; }
-		case ID_FLOW_DECREASETEMPO: { pAlgManager->SetTempo(pAlgManager->GetTempo()-fTempoDelta); break; }
-		case ID_FLOW_SETTOSLOW: { pAlgManager->SetTempo(fTempoDelta); break; }
-		case ID_FLOW_SETTOFAST: { pAlgManager->SetTempo(fTempoDelta*12); break; }
+			pAppState->m_algManager.SwapPause();
+			break;
+		}
+		case ID_FLOW_INCREASETEMPO: { pAppState->m_algManager.SetTempo(pAppState->m_algManager.GetTempo()+fTempoDelta); break; }
+		case ID_FLOW_DECREASETEMPO: { pAppState->m_algManager.SetTempo(pAppState->m_algManager.GetTempo()-fTempoDelta); break; }
+		case ID_FLOW_SETTOSLOW: { pAppState->m_algManager.SetTempo(fTempoDelta); break; }
+		case ID_FLOW_SETTOFAST: { pAppState->m_algManager.SetTempo(fTempoDelta*12); break; }
 		case ID_HELP_ABOUT: {
 				MessageBox(NULL, "Created by Bart \"Fen\" Filipek\n9th April 2006, Updated in December 2019", "Info", MB_OK | MB_ICONQUESTION);
 				break;
