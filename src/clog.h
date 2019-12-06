@@ -11,39 +11,34 @@
 #ifndef CLOG_HPP
 #define CLOG_HPP
 
-#include <string.h>
-#include <stdio.h>
-#include <time.h>
-#include <stdarg.h>
-#include <windows.h>
+#include <string>
 
-enum class LOG_MODE { lmNormal = 0, lmError, lmSuccess };
+enum class LogMode { Info = 0, Err, Success };
 
 /*-----------------------------------------------------------------------------+
 |                                The CLog class                                |
 +-----------------------------------------------------------------------------*/
 class CLog {
 public:
-	CLog() noexcept;
-	CLog(const char* szFileName) noexcept;
+	CLog() { }
+	explicit CLog(std::string filename) noexcept;
 
 	// methods:
-	bool Init(const char* szFileName) noexcept;
-	void AddMsg(LOG_MODE lmMode, const char* szMsg, ...) noexcept;
+	bool Init(std::string filename) noexcept;
+	void AddMsg(LogMode lmMode, const char* szMsg, ...) noexcept;
 	
 	inline void Enable() noexcept{ m_bEnabled = true; }
 	inline void Disable() noexcept { m_bEnabled = false; }
 	inline bool IsEnabled() const noexcept { return m_bEnabled; }
-private:
-	const char *GetClassName(LOG_MODE lmMode) const noexcept;
 
-	char m_szFileName[256];
+	static CLog* Instance() { static CLog onlyInstance; return &onlyInstance; }
+
+private:
+	const char *GetLogClassName(LogMode lmMode) const noexcept;
+
+	std::string m_filename;
 	bool m_bEnabled;
 };
-
-// there will be one log per application...
-// it should be done by usigng a singleton class but for a while it is not
-extern CLog g_Log;
 
 #endif // CLOG_HPP
 

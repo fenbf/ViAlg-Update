@@ -8,40 +8,23 @@
 | by Trent Polack.															   |
 +-----------------------------------------------------------------------------*/
 
-/*
-system logów bêdzie bardzo prosty, oparty w³aœciwie na jednej czy kilku funkcjach
-inicjujemy obiekt podaj¹c nazwê pliku do wpisów, a póxniej wywo³ujemy metodê Write
-lub coœ w tym stylu aby dokonaæ wpisu.
-Bardzo ciekawa metoda polega na zapisie w HTMLu dziêki czemu mo¿na stosowaæ ró¿ne
-kolory, podbieram ten pomys³ z kodu do wczeœniej wspomnianej ksi¹¿ki.
-
-format pliku HTML
-Log Started
-Date and Time: ....
-
- - wiadomoœæ 1	 (w danym kolorze)
- - wiadomoœæ 2
- - ...
-*/
-
 #include "clog.h"
-#include <string_view>
+
+#include <stdio.h>
+#include <time.h>
+#include <stdarg.h>
+#define WIN32_LEAN_AND_MEAN 
+#include <windows.h>
 
 /*-----------------------------------------------------------------------------+
 |                      Implementation of the CLog class                        |
 +-----------------------------------------------------------------------------*/
 
-// constructor:
-CLog::CLog() noexcept :
-	m_bEnabled(false)
-{
-	m_szFileName[0] = '\0';
-}
 
 // constructor 2:
-CLog::CLog(const char *szFileName) noexcept
+CLog::CLog(std::string filename) noexcept
 {
-	Init(szFileName);
+	Init(filename);
 }
 
 /*-----------------------------------------------------------------------------+
@@ -55,14 +38,14 @@ CLog::CLog(const char *szFileName) noexcept
 | Return value:																   |
 |    true if everything goes ok, unless false								   |
 +-----------------------------------------------------------------------------*/
-bool CLog::Init(const char *szFileName) noexcept {
-	strcpy_s(m_szFileName, szFileName);
+bool CLog::Init(std::string filename) noexcept {
+	m_filename = filename;
 
 	// open clean file and write some basic info:
 	FILE *f;
-	fopen_s(&f, m_szFileName, "w+");
+	fopen_s(&f, m_filename.c_str(), "w+");
 
-	if (f == NULL)
+	if (f == nullptr)
 		return false;
 
 	m_bEnabled = true;
@@ -108,12 +91,12 @@ bool CLog::Init(const char *szFileName) noexcept {
 | Return value:																   |
 |    none								                                       |
 +-----------------------------------------------------------------------------*/
-void CLog::AddMsg(LOG_MODE lmMode, const char *szMsg, ...) noexcept {
+void CLog::AddMsg(LogMode lmMode, const char *szMsg, ...) noexcept {
 	if (m_bEnabled == false)
 		return;
 	
 	FILE *f;
-	fopen_s(&f, m_szFileName, "r+");
+	fopen_s(&f, m_filename.c_str(), "r+");
 	if (f == NULL)
 		return;
 
@@ -131,7 +114,7 @@ void CLog::AddMsg(LOG_MODE lmMode, const char *szMsg, ...) noexcept {
 
 	// overwrite last 16 characters - that is "</BODY>\n"..."
 	fseek(f, -18, SEEK_END);
-	fprintf(f, "<p class=\"%s\"> %s  </p>\n", GetClassName(lmMode), buf);
+	fprintf(f, "<p class=\"%s\"> %s  </p>\n", GetLogClassName(lmMode), buf);
 	fprintf(f, "</BODY>\n"
 		       "</HTML>\n");
 
@@ -150,7 +133,7 @@ void CLog::AddMsg(LOG_MODE lmMode, const char *szMsg, ...) noexcept {
 | Return value:																   |
 |    array of char that represent color fe. "ffeeff"						   |
 +-----------------------------------------------------------------------------*/
-const char *CLog::GetClassName(LOG_MODE lmMode) const noexcept {
+const char *CLog::GetLogClassName(LogMode lmMode) const noexcept {
 	static constexpr std::string_view LogClasses[] = { "info", 
 												 		"err",  
 														"success" };
