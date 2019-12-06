@@ -25,13 +25,11 @@ public:
 
 	// methods:
 	bool Init(std::string filename) noexcept;
-	void AddMsg(LogMode lmMode, const char* szMsg, ...) noexcept;
+	void AddMsg(LogMode lmMode, const char* szMsg, ...) const noexcept;
 	
 	inline void Enable() noexcept{ m_bEnabled = true; }
 	inline void Disable() noexcept { m_bEnabled = false; }
 	inline bool IsEnabled() const noexcept { return m_bEnabled; }
-
-	static CLog* Instance() { static CLog onlyInstance; return &onlyInstance; }
 
 private:
 	const char *GetLogClassName(LogMode lmMode) const noexcept;

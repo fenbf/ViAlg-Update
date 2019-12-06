@@ -15,6 +15,7 @@
 #include <gl\gl.h>
 #include <gl\glu.h>
 #include "ctimer.h"
+#include <any>
 
 /*-----------------------------------------------------------------------------+
 | The CGLApp class															   |
@@ -26,7 +27,7 @@ public:
 
 	// methods:
 	// core:
-	bool Init(WORD hMenu = NULL, bool (*procCommand)(WORD, HMENU) = NULL, WORD hIcon = NULL);
+	bool Init(WORD hMenu = NULL, bool (*procCommand)(WORD, HMENU, std::any&) = NULL, WORD hIcon = NULL);
 	bool Destroy();
 	static void SetRenderProc(void (*procRender)()) { m_procRender = procRender; }
 
@@ -68,7 +69,8 @@ public:
 
 	static bool m_bFullscreen;
 
-	static bool (*m_procCommand)(WORD wId, HMENU hMenu);
+	static std::any s_param;
+	static bool (*m_procCommand)(WORD wId, HMENU hMenu, std::any& param);
 	static void (*m_procRender)();
 private:
 	// windows variables:

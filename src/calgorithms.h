@@ -17,7 +17,7 @@
 // the CAlgorithm class -------------------------------------------------------+
 class CAlgorithm {
 public:
-	CAlgorithm(): m_bRunning(false) { }
+	explicit CAlgorithm(const CLog& logger): m_bRunning(false), m_logger(logger) { }
 	virtual ~CAlgorithm() { }
 
 	virtual void Init(CViData *viData) = 0;
@@ -50,12 +50,13 @@ private:
 protected:
 	bool m_bRunning;
 	char m_strName[64];		// it must be set in constructor
+	const CLog& m_logger;
 };
 
 // the CBubbleSortAlgorithm class ---------------------------------------------+
 class CBubbleSortAlgorithm : public CAlgorithm {
 public:
-	CBubbleSortAlgorithm();
+	explicit CBubbleSortAlgorithm(const CLog& logger);
 	~CBubbleSortAlgorithm();
 
 	void Init(CViData *viData);
@@ -69,7 +70,7 @@ private:
 // the CShakerSortAlgorithm class ---------------------------------------------+
 class CShakerSortAlgorithm : public CAlgorithm {
 public:
-	CShakerSortAlgorithm();
+	explicit CShakerSortAlgorithm(const CLog& logger);
 	~CShakerSortAlgorithm();
 
 	void Init(CViData *viData);
@@ -83,7 +84,7 @@ private:
 // the CSelectionSortAlgorithm class ------------------------------------------+
 class CSelectionSortAlgorithm : public CAlgorithm {
 public:
-	CSelectionSortAlgorithm();
+	explicit CSelectionSortAlgorithm(const CLog& logger);
 	~CSelectionSortAlgorithm();
 
 	void Init(CViData *viData);
@@ -98,7 +99,7 @@ private:
 // the CInsertionSortAlgorithm class ------------------------------------------+
 class CInsertionSortAlgorithm : public CAlgorithm {
 public:
-	CInsertionSortAlgorithm();
+	explicit CInsertionSortAlgorithm(const CLog& logger);
 	~CInsertionSortAlgorithm();
 
 	void Init(CViData *viData);
@@ -113,7 +114,7 @@ private:
 // the CShellSortAlgorithm class ------------------------------------------+
 class CShellSortAlgorithm : public CAlgorithm {
 public:
-	CShellSortAlgorithm();
+	explicit CShellSortAlgorithm(const CLog& logger);
 	~CShellSortAlgorithm();
 
 	void Init(CViData *viData);
@@ -129,7 +130,7 @@ private:
 // the CShellSortAlgorithm class ------------------------------------------+
 class CQuickSortAlgorithm : public CAlgorithm {
 public:
-	CQuickSortAlgorithm();
+	explicit CQuickSortAlgorithm(const CLog& logger);
 	~CQuickSortAlgorithm();
 
 	void Init(CViData* viData);
@@ -148,7 +149,7 @@ private:
 // the CAlgManager class ------------------------------------------------------+
 class CAlgManager {
 public:
-	CAlgManager();
+	explicit CAlgManager(const CLog& logger);
 	~CAlgManager();
 
 	void Update();
@@ -173,6 +174,8 @@ private:
 	DataOrder m_dOrder;
 	CViArray<float> m_viArray;
 	CViArray<float> m_viArray2;
+
+	const CLog& m_logger;
 };
 
 #endif // CALGORITHMS_H

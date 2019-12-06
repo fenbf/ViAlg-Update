@@ -21,18 +21,18 @@ int CAlgorithm::m_iIterations = 0;
 |               Implementation of the CBubbleSortAlgorithm class               |
 +-----------------------------------------------------------------------------*/
 
-CBubbleSortAlgorithm::CBubbleSortAlgorithm():
+CBubbleSortAlgorithm::CBubbleSortAlgorithm(const CLog& logger): CAlgorithm(logger),
     m_i(0),
 	m_j(0)
 {
 	m_viArray = NULL;
 	sprintf_s(m_strName, "Bubble Sort");
 
-	CLog::Instance()->AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
+	m_logger.AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
 }
 
 CBubbleSortAlgorithm::~CBubbleSortAlgorithm() {
-	CLog::Instance()->AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
+	m_logger.AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
 }
 
 // the Init method ------------------------------------------------------------+
@@ -84,7 +84,7 @@ void CBubbleSortAlgorithm::Stop() {
 |               Implementation of the CShakerSortAlgorithm class               |
 +-----------------------------------------------------------------------------*/
 
-CShakerSortAlgorithm::CShakerSortAlgorithm():
+CShakerSortAlgorithm::CShakerSortAlgorithm(const CLog& logger) : CAlgorithm(logger),
     m_i(0),
 	m_j(0),
 	m_j2(0)
@@ -92,11 +92,11 @@ CShakerSortAlgorithm::CShakerSortAlgorithm():
 	m_viArray = NULL;
 	sprintf_s(m_strName, "Shaker Sort");
 
-	CLog::Instance()->AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
+	m_logger.AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
 }
 
 CShakerSortAlgorithm::~CShakerSortAlgorithm() {
-	CLog::Instance()->AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
+	m_logger.AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
 }
 
 // the Init method ------------------------------------------------------------+
@@ -156,7 +156,7 @@ void CShakerSortAlgorithm::Stop() {
 |               Implementation of the CSelectionSortAlgorithm class               |
 +-----------------------------------------------------------------------------*/
 
-CSelectionSortAlgorithm::CSelectionSortAlgorithm():
+CSelectionSortAlgorithm::CSelectionSortAlgorithm(const CLog& logger) : CAlgorithm(logger),
     m_i(0),
 	m_j(0),
 	m_iMin(0)
@@ -164,11 +164,11 @@ CSelectionSortAlgorithm::CSelectionSortAlgorithm():
 	m_viArray = NULL;
 	sprintf_s(m_strName, "Selection Sort");
 
-	CLog::Instance()->AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
+	m_logger.AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
 }
 
 CSelectionSortAlgorithm::~CSelectionSortAlgorithm() {
-	CLog::Instance()->AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
+	m_logger.AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
 }
 
 // the Init method ------------------------------------------------------------+
@@ -224,7 +224,7 @@ void CSelectionSortAlgorithm::Stop() {
 |               Implementation of the CInsertionSortAlgorithm class               |
 +-----------------------------------------------------------------------------*/
 
-CInsertionSortAlgorithm::CInsertionSortAlgorithm():
+CInsertionSortAlgorithm::CInsertionSortAlgorithm(const CLog& logger) : CAlgorithm(logger),
     m_i(0),
 	m_j(0),
 	m_fValue(0.0f)
@@ -232,11 +232,11 @@ CInsertionSortAlgorithm::CInsertionSortAlgorithm():
 	m_viArray = NULL;
 	sprintf_s(m_strName, "Insertion Sort");
 
-	CLog::Instance()->AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
+	m_logger.AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
 }
 
 CInsertionSortAlgorithm::~CInsertionSortAlgorithm() {
-	CLog::Instance()->AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
+	m_logger.AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
 }
 
 // the Init method ------------------------------------------------------------+
@@ -298,7 +298,7 @@ void CInsertionSortAlgorithm::Stop() {
 |               Implementation of the CShellSortAlgorithm class               |
 +-----------------------------------------------------------------------------*/
 
-CShellSortAlgorithm::CShellSortAlgorithm():
+CShellSortAlgorithm::CShellSortAlgorithm(const CLog& logger) : CAlgorithm(logger),
     m_i(0),
 	m_j(0),
 	m_h(0),
@@ -307,11 +307,11 @@ CShellSortAlgorithm::CShellSortAlgorithm():
 	m_viArray = NULL;
 	sprintf_s(m_strName, "Shell Sort");
 
-	CLog::Instance()->AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
+	m_logger.AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
 }
 
 CShellSortAlgorithm::~CShellSortAlgorithm() {
-	CLog::Instance()->AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
+	m_logger.AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
 }
 
 // the Init method ------------------------------------------------------------+
@@ -441,16 +441,16 @@ void CShellSortAlgorithm::Stop() {
 //	}
 //}
 
-CQuickSortAlgorithm::CQuickSortAlgorithm()
+CQuickSortAlgorithm::CQuickSortAlgorithm(const CLog& logger) : CAlgorithm(logger)
 {
 	m_viArray = NULL;
 	sprintf_s(m_strName, "Quick Sort");
 
-	CLog::Instance()->AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
+	m_logger.AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
 }
 
 CQuickSortAlgorithm::~CQuickSortAlgorithm() {
-	CLog::Instance()->AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
+	m_logger.AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
 }
 
 // the Init method ------------------------------------------------------------+
@@ -529,19 +529,20 @@ void CQuickSortAlgorithm::Stop() {
 +-----------------------------------------------------------------------------*/
 
 // constructor:
-CAlgManager::CAlgManager():
+CAlgManager::CAlgManager(const CLog& logger):
     m_bBeat(1.0),
 	m_bPause(false),
 	m_dOrder(doSpecialRandomized),
-	m_viArray()
+	m_viArray(),
+	m_logger(logger)
 {
 	m_alg = NULL;
-	CLog::Instance()->AddMsg(LogMode::Info, "%s - initialised", typeid(*this).name());
+	m_logger.AddMsg(LogMode::Info, "%s - initialised", typeid(*this).name());
 }
 
 // destructor:
 CAlgManager::~CAlgManager() {
-	CLog::Instance()->AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
+	m_logger.AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
 }
 
 // the Update method ----------------------------------------------------------+
@@ -565,7 +566,7 @@ void CAlgManager::RunAgain() {
 
 // the GenerateData method ----------------------------------------------------+
 void CAlgManager::GenerateData(DataOrder dOrder) {
-	CLog::Instance()->AddMsg(LogMode::Info, "%s - Data was generated: type - %s", typeid(*this).name(), GetDataOrderName());
+	m_logger.AddMsg(LogMode::Info, "%s - Data was generated: type - %s", typeid(*this).name(), GetDataOrderName());
 	m_viArray2.Generate(dOrder);
 	m_dOrder = dOrder;
 	RegenerateData();
@@ -584,13 +585,13 @@ void CAlgManager::SetAlgorithm(CAlgorithm *cAlg) {
 	m_viArray.SetAdditionalMark(-1); 
 	m_alg = cAlg; 
 	m_alg->Init(&m_viArray);
-	CLog::Instance()->AddMsg(LogMode::Info, "%s - %s was assigned the manager", typeid(*this).name(), GetAlgorithmName());
+	m_logger.AddMsg(LogMode::Info, "%s - %s was assigned the manager", typeid(*this).name(), GetAlgorithmName());
 }
 
 // the SetNumOfElements method ------------------------------------------------+
 void CAlgManager::SetNumOfElements(int iElems) {
 	if(iElems == m_viArray2.GetSize()) return; 
-	CLog::Instance()->AddMsg(LogMode::Info, "%s - new number of data element was set to: %d", typeid(*this).name(), iElems);
+	m_logger.AddMsg(LogMode::Info, "%s - new number of data element was set to: %d", typeid(*this).name(), iElems);
 	if (m_alg != NULL) m_alg->Stop(); 
 	m_viArray2.Resize(iElems); 
 	GenerateData(m_dOrder);

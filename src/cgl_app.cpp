@@ -37,7 +37,8 @@ int CGLApp::m_menuCommand  = 0;
 
 bool CGLApp::m_bFullscreen = false;
 
-bool (*CGLApp::m_procCommand)(WORD, HMENU) = NULL;
+std::any CGLApp::s_param;
+bool (*CGLApp::m_procCommand)(WORD, HMENU, std::any& param) = NULL;
 void (*CGLApp::m_procRender)() = NULL;
 
 // default constructor:
@@ -67,7 +68,7 @@ CGLApp::~CGLApp() {
 | Return value:																   |
 |    true if everything goes ok, unless false								   |
 +-----------------------------------------------------------------------------*/
-bool CGLApp::Init(WORD hMenu, bool (*procCommand)(WORD, HMENU), WORD hIcon) {
+bool CGLApp::Init(WORD hMenu, bool (*procCommand)(WORD, HMENU, std::any&), WORD hIcon) {
 	WNDCLASS wc;
 	DWORD wStyle, wStyleEx;
 	RECT rectWin;
@@ -276,7 +277,7 @@ LRESULT CALLBACK CGLApp::WindowProc(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM
 		case WM_COMMAND: {
 				m_menuCommand = LOWORD(wParam);
 				if (m_procCommand != NULL) {
-					if (m_procCommand(m_menuCommand, m_hMenu) == false)
+					if (m_procCommand(m_menuCommand, m_hMenu, s_param) == false)
 						PostQuitMessage(0);
 				}
 				return 0;

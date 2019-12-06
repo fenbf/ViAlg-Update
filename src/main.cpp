@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <exception>
+#include <stdexcept>
 #include <typeinfo>
 #include <time.h>
 #include <vector>
@@ -32,8 +33,6 @@
 #include "calgorithms.h"
 
 #include "resource.h"
-
-using namespace std;
 
 const double fTempoDelta = 500.0;  // beats per minute (bpm)
 const int iElementsDelta = 10;
@@ -61,36 +60,38 @@ bool g_bFloor;
 bool g_bInfo;
 bool g_bRegenerate;
 
+// #todo: make those fields not global so that they don't outlive the logger!
 std::vector<std::unique_ptr<CAlgorithm>> g_Algorithms; // #todo: make the vector const
 std::map<long, size_t> g_mapMenuIDToAlgIndex; // #todo: make the map const
-CAlgManager g_algManager;
-CAVSystem g_avSystem;
 
 // functions' prototypes ------------------------------------------------------+
-void InitApp();
-void InitGL();
-void CleanUp();
+void InitApp(const CLog &logger, CAlgManager& algManager, CAVSystem& avSystem);
+void InitGL(const CLog& logger);
+void CleanUp(const CLog& logger);
 void ResizeGLScene(int iWidth, int iHeight, bool bView = false);
-void RenderScene();
-void UpdateAnimation();
+void RenderScene(CAlgManager& algManager, CAVSystem& avSystem);
+void UpdateAnimation(CAlgManager& algManager);
 void DrawFloor();
 bool ProcessKeyboard();
-bool OnMenuCommand(WORD iId, HMENU hMenu);
+bool OnMenuCommand(WORD iId, HMENU hMenu, std::any& param);
 bool OnExit();
 
 /*-----------------------------------------------------------------------------+
 |                                    MAIN                                      |
 +-----------------------------------------------------------------------------*/
 int WINAPI WinMain(HINSTANCE current_in, HINSTANCE prev_in, LPSTR cmdl, int n_show) {
-	
-	CLog::Instance()->Init("log.html");
+	CLog logger{ "log.html" };
+
+	CAlgManager algManager{logger};
+	CAVSystem avSystem{ logger };
+
 	try {
-		InitApp();
+		InitApp(logger, algManager, avSystem);
 	}
-	catch (exception &e) {
-		CLog::Instance()->AddMsg(LogMode::Err, "Exception was thrown: type: %s - message: %s", typeid(e).name(), e.what());
+	catch (const std::exception &e) {
+		logger.AddMsg(LogMode::Err, "Exception was thrown: type: %s - message: %s", typeid(e).name(), e.what());
 		MessageBox(NULL, e.what(), "Exception!", MB_OK | MB_ICONSTOP);
-		CleanUp();
+		CleanUp(logger);
 		return 1;
 	}
 
@@ -115,8 +116,8 @@ int WINAPI WinMain(HINSTANCE current_in, HINSTANCE prev_in, LPSTR cmdl, int n_sh
 			
 		if (!ProcessKeyboard() && !OnExit()) break;
 
-		UpdateAnimation();
-		RenderScene(); 
+		UpdateAnimation(algManager);
+		RenderScene(algManager, avSystem); 
 
 		//glFlush();
 		SwapBuffers(g_glApp.GetHdc());
@@ -125,7 +126,7 @@ int WINAPI WinMain(HINSTANCE current_in, HINSTANCE prev_in, LPSTR cmdl, int n_sh
 			printf("WaitForSingleObject failed (%d)\n", GetLastError());
 	}
 
-	CleanUp();
+	CleanUp(logger);
 
 	return 0;
 }
@@ -136,30 +137,32 @@ int WINAPI WinMain(HINSTANCE current_in, HINSTANCE prev_in, LPSTR cmdl, int n_sh
 | Description:																   |
 |    Initialises all of the application.                                       | 
 +-----------------------------------------------------------------------------*/
-void InitApp() {	
+void InitApp(const CLog& logger, CAlgManager& algManager, CAVSystem& avSystem) {
 	CGLApp::m_iBpp = 32;
 	CGLApp::m_iWidth = 1024;
 	CGLApp::m_iHeight = 768;
 	CGLApp::m_bFullscreen = false;
 	sprintf_s(CGLApp::m_szTitle, "ViAlg");
 	
-	if (!g_glApp.Init(IDR_MENU1, &OnMenuCommand)) throw exception("Failed in initialising the Application");
-	else CLog::Instance()->AddMsg(LogMode::Success, "Main window of the application has been created!");
+	if (!g_glApp.Init(IDR_MENU1, &OnMenuCommand)) throw std::runtime_error("Failed in initialising the Application");
+	else logger.AddMsg(LogMode::Success, "Main window of the application has been created!");
 
-	if (!g_Timer.Init()) throw exception("High Performance Timer not available!");
-	else CLog::Instance()->AddMsg(LogMode::Success, "High Performance Timer available!");
+	g_glApp.s_param = std::pair{ &algManager, &avSystem };
 
-	g_glApp.SetRenderProc(&RenderScene);
+	if (!g_Timer.Init()) throw std::runtime_error("High Performance Timer not available!");
+	else logger.AddMsg(LogMode::Success, "High Performance Timer available!");
+
+	//g_glApp.SetRenderProc(&RenderScene);
 
     BuildSinCosTables();
 	srand((unsigned int)time(NULL));
 
-	g_Algorithms.emplace_back(new CBubbleSortAlgorithm());
-	g_Algorithms.emplace_back(new CShakerSortAlgorithm());
-	g_Algorithms.emplace_back(new CSelectionSortAlgorithm());
-	g_Algorithms.emplace_back(new CInsertionSortAlgorithm());
-	g_Algorithms.emplace_back(new CShellSortAlgorithm());
-	g_Algorithms.emplace_back(new CQuickSortAlgorithm());
+	g_Algorithms.emplace_back(new CBubbleSortAlgorithm(logger));
+	g_Algorithms.emplace_back(new CShakerSortAlgorithm(logger));
+	g_Algorithms.emplace_back(new CSelectionSortAlgorithm(logger));
+	g_Algorithms.emplace_back(new CInsertionSortAlgorithm(logger));
+	g_Algorithms.emplace_back(new CShellSortAlgorithm(logger));
+	g_Algorithms.emplace_back(new CQuickSortAlgorithm(logger));
 
 	g_mapMenuIDToAlgIndex[ID_METHOD_BUBBLESORT] = 0;
 	g_mapMenuIDToAlgIndex[ID_METHOD_SHAKERSORT] = 1;
@@ -168,21 +171,21 @@ void InitApp() {
 	g_mapMenuIDToAlgIndex[ID_METHOD_SHELLSORT] = 4;
 	g_mapMenuIDToAlgIndex[ID_METHOD_QUICKSORT] = 5;
 
-	g_algManager.SetTempo(3000.0);
-	g_algManager.SetNumOfElements(100);
-	g_algManager.GenerateData(doSpecialRandomized);
-	g_algManager.SetAlgorithm(g_Algorithms[0].get());
+	algManager.SetTempo(3000.0);
+	algManager.SetNumOfElements(100);
+	algManager.GenerateData(doSpecialRandomized);
+	algManager.SetAlgorithm(g_Algorithms[0].get());
 
-	g_avSystem.SetMaxSize(5.0f, 1.0f, 1.0f);
+	avSystem.SetMaxSize(5.0f, 1.0f, 1.0f);
 
 	g_iTexFloor = LoadTextureFromBmp("data\\checker64.bmp", GL_BGR_EXT, GL_LINEAR_MIPMAP_LINEAR);
 	g_iTexFrame = LoadTextureFromBmp("data\\frame.bmp", GL_BGR_EXT, GL_LINEAR_MIPMAP_LINEAR);
 
-	g_avSystem.SetDiagramBlockInfo(btBox, VECTOR3D(0.2f, 0.3f, 0.7f),       // normal color
+	avSystem.SetDiagramBlockInfo(btBox, VECTOR3D(0.2f, 0.3f, 0.7f),       // normal color
 		                                  VECTOR3D(0.2f, 1.0f, 0.2f),        // marked
 										  VECTOR3D(0.4f, 0.6f, 0.99f));      // highlighted 
-	g_avSystem.SetOutlook(VECTOR3D(0.8f, 0.7f, 0.3f), g_iTexFrame);
-	g_avSystem.m_bTextured = false;
+	avSystem.SetOutlook(VECTOR3D(0.8f, 0.7f, 0.3f), g_iTexFrame);
+	avSystem.m_bTextured = false;
 
     // switches:
 	g_bLight = true;
@@ -193,24 +196,24 @@ void InitApp() {
 	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_REFLECTION, MF_CHECKED);
 	g_bFloor = true;
 	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_FLOOR, MF_CHECKED);
-	g_avSystem.m_bFrame = true;
+	avSystem.m_bFrame = true;
 	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_FRAME, MF_CHECKED);
-	g_avSystem.m_bHoriz = false;
+	avSystem.m_bHoriz = false;
 	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_HORIZ, MF_UNCHECKED);
 	g_bInfo = true;
 	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_INFO, MF_CHECKED);
 	g_bRegenerate = true;
 	CheckMenuItem(g_glApp.m_hMenu, ID_DATAORDER_REGENERATE, MF_CHECKED);
-	CLog::Instance()->AddMsg(LogMode::Success, "App's menu fixed!");
+	logger.AddMsg(LogMode::Success, "App's menu fixed!");
 
-	InitGL();
+	InitGL(logger);
 
 	// Create an unnamed waitable timer.
 	hTimer = CreateWaitableTimer(NULL, TRUE, NULL);
 	if (NULL == hTimer)
-		throw exception("CreateWaitableTimer failed");
+		throw std::runtime_error("CreateWaitableTimer failed");
 
-	CLog::Instance()->AddMsg(LogMode::Success, "App initialised!");
+	logger.AddMsg(LogMode::Success, "App initialised!");
 }
 
 /*-----------------------------------------------------------------------------+
@@ -219,7 +222,7 @@ void InitApp() {
 | Description:																   |
 |    Does initialization of the OpenGL                                         | 
 +-----------------------------------------------------------------------------*/
-void InitGL() {
+void InitGL(const CLog& logger) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);	
 
@@ -229,8 +232,8 @@ void InitGL() {
 
 	glShadeModel(GL_SMOOTH);
 
-	if (CGLFont::Create2dCourierFont(&g_glApp, g_Font, 16, 8)) CLog::Instance()->AddMsg(LogMode::Success, "Courier Font Created!");
-	else throw exception("Faild to create the courier font!");
+	if (CGLFont::Create2dCourierFont(&g_glApp, g_Font, 16, 8)) logger.AddMsg(LogMode::Success, "Courier Font Created!");
+	else throw std::runtime_error("Faild to create the courier font!");
 
 	// camera:
 	g_Camera.InitView(1.0f, 1000.0f, 90.0f, 1.33f);
@@ -249,18 +252,18 @@ void InitGL() {
 
 	ResizeGLScene(g_glApp.m_iWidth, g_glApp.m_iHeight);
 
-	CLog::Instance()->AddMsg(LogMode::Success, "OpenGL initialised!");
+	logger.AddMsg(LogMode::Success, "OpenGL initialised!");
 }
 
 /*-----------------------------------------------------------------------------+
 |                                  CleanUp                                     |
 +-----------------------------------------------------------------------------*/
-void CleanUp() {
-	CLog::Instance()->AddMsg(LogMode::Info, "Closing the application...");
+void CleanUp(const CLog& logger) {
+	logger.AddMsg(LogMode::Info, "Closing the application...");
 
 	glDeleteTextures(1, &g_iTexFloor);
 	glDeleteTextures(1, &g_iTexFrame);
-	CLog::Instance()->AddMsg(LogMode::Info, "Textures were deleted...");
+	logger.AddMsg(LogMode::Info, "Textures were deleted...");
 
 	// #notes: no need to deallocate this stuff now!
 	//delete g_Algorithms[ABUBBLE_SORT];
@@ -276,7 +279,7 @@ void CleanUp() {
 	g_Font.Delete();
 	g_glApp.Destroy();
 
-	CLog::Instance()->AddMsg(LogMode::Success, "Application was closed properly");
+	logger.AddMsg(LogMode::Success, "Application was closed properly");
 }
 
 /*-----------------------------------------------------------------------------+
@@ -297,7 +300,7 @@ void ResizeGLScene(int iWidth, int iHeight, bool bView) {
 /*-----------------------------------------------------------------------------+
 |                                RenderScene                                   |
 +-----------------------------------------------------------------------------*/
-void RenderScene() {
+void RenderScene(CAlgManager& algManager, CAVSystem& avSystem) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); 
 	
 	if (g_bLight) glEnable(GL_LIGHTING);
@@ -335,7 +338,7 @@ void RenderScene() {
 			//glLightfv(GL_LIGHT0, GL_POSITION, light_pos);		
 			glFrontFace(GL_CW);
 			glTranslatef(0.0f, 0.3f, 0.0);
-			g_algManager.Render(&g_avSystem);
+			algManager.Render(&avSystem);
 			glFrontFace(GL_CCW);
 		glPopMatrix();
 		glDisable(GL_CLIP_PLANE0);						// Disable Clip Plane For Drawing The Floor
@@ -356,7 +359,7 @@ void RenderScene() {
 	glPushMatrix();
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTranslatef(0.0f, 0.3f, 0.0);
-	    g_algManager.Render(&g_avSystem);
+	    algManager.Render(&avSystem);
 	glPopMatrix();
 
 	// draw text: 
@@ -365,10 +368,10 @@ void RenderScene() {
 	        glColor3f(0.0f, 0.0f, 0.0f);
 		    glTextPrintf(&g_Font, 10.0f, 20.0f, "Fps: %2.3f", g_Timer.GetFps());
 			if (g_Timer.IsFreezed()) glTextout(&g_Font, "Algorithm paused", 500.0f, 20.0f);
-			else glTextPrintf(&g_Font, 500.0f, 20.0f, "Update tempo: %3.1f", g_algManager.GetTempo()/100.0);
-		    glTextPrintf(&g_Font, 10.0f, 34.0f, "Algorithm: %s", g_algManager.GetAlgorithmName());
-		    glTextPrintf(&g_Font, 10.0f, 48.0f, "Num of Elements: %d", g_algManager.GetNumOfElements());
-			glTextPrintf(&g_Font, 10.0f, 62.0f, "Elements order: %s", g_algManager.GetDataOrderName());
+			else glTextPrintf(&g_Font, 500.0f, 20.0f, "Update tempo: %3.1f", algManager.GetTempo()/100.0);
+		    glTextPrintf(&g_Font, 10.0f, 34.0f, "Algorithm: %s", algManager.GetAlgorithmName());
+		    glTextPrintf(&g_Font, 10.0f, 48.0f, "Num of Elements: %d", algManager.GetNumOfElements());
+			glTextPrintf(&g_Font, 10.0f, 62.0f, "Elements order: %s", algManager.GetDataOrderName());
 		    glTextPrintf(&g_Font, 10.0f, 76.0f, "Comparisions: %d", CAlgorithm::GetNumOfComparisions());
 		    glTextPrintf(&g_Font, 10.0f, 90.0f, "Exchanges: %d", CAlgorithm::GetNumOfExchanges());
 			glTextPrintf(&g_Font, 10.0f, 104.0f, "Iterations: %d", CAlgorithm::GetNumOfIterations());
@@ -406,12 +409,12 @@ void DrawFloor()
 /*-----------------------------------------------------------------------------+
 |                              UpdateAnimation                                 |
 +-----------------------------------------------------------------------------*/
-void UpdateAnimation() {
+void UpdateAnimation(CAlgManager& algManager) {
 	g_Timer.Update();
 
 	if (g_Timer.IsFreezed()) return;
 
-	g_algManager.Update();
+	algManager.Update();
 }
 
 /*-----------------------------------------------------------------------------+
@@ -468,16 +471,18 @@ bool ProcessKeyboard() {
 +------------------------------------------------------------------------------+
 | Returns "false" if user wants to exit                                        |
 +-----------------------------------------------------------------------------*/
-bool OnMenuCommand(WORD iId, HMENU hMenu) {
+bool OnMenuCommand(WORD iId, HMENU hMenu, std::any& param) {
+	auto [pAlgManager, pAvSystem]  = std::any_cast<std::pair<CAlgManager*, CAVSystem*>>(param);
+
 	switch ( iId ) {
 		case ID_FILE_EXIT: return false;
-		case ID_DIAGRAMTYPE_POINTS:    { g_avSystem.SetBlockType(btPoint); break; }
-		case ID_DIAGRAMTYPE_BOXES:     { g_avSystem.SetBlockType(btBox); break; }
-	    case ID_DIAGRAMTYPE_PYRAMIDS:  { g_avSystem.SetBlockType(btPyramid); break; }
-	    case ID_DIAGRAMTYPE_CYLINDERS: { g_avSystem.SetBlockType(btCylinder); break; }
+		case ID_DIAGRAMTYPE_POINTS:    { pAvSystem->SetBlockType(btPoint); break; }
+		case ID_DIAGRAMTYPE_BOXES:     { pAvSystem->SetBlockType(btBox); break; }
+	    case ID_DIAGRAMTYPE_PYRAMIDS:  { pAvSystem->SetBlockType(btPyramid); break; }
+	    case ID_DIAGRAMTYPE_CYLINDERS: { pAvSystem->SetBlockType(btCylinder); break; }
 		case ID_ALGORITHM_RUNAGAIN:    { 
-			    if (g_bRegenerate) g_algManager.RegenerateData(); 
-				g_algManager.RunAgain(); 
+			    if (g_bRegenerate) pAlgManager->RegenerateData(); 
+				pAlgManager->RunAgain(); 
 				break; 
 			}
 		case ID_METHOD_BUBBLESORT: 
@@ -486,29 +491,29 @@ bool OnMenuCommand(WORD iId, HMENU hMenu) {
 		case ID_METHOD_INSERTIONSORT: 
 		case ID_METHOD_SHELLSORT: 
 		case ID_METHOD_QUICKSORT: {
-				g_algManager.SetAlgorithm(g_Algorithms[g_mapMenuIDToAlgIndex[iId]].get());
-				if (g_bRegenerate) g_algManager.RegenerateData();
-				g_algManager.RunAgain();
+				pAlgManager->SetAlgorithm(g_Algorithms[g_mapMenuIDToAlgIndex[iId]].get());
+				if (g_bRegenerate) pAlgManager->RegenerateData();
+				pAlgManager->RunAgain();
 				break;
 			}
 		case ID_DATAORDER_SORTED: { 
-			    g_algManager.GenerateData(doSorted); 
-				g_algManager.RunAgain(); 
+				pAlgManager->GenerateData(doSorted);
+				pAlgManager->RunAgain();
 				break; 
 		    }
 		case ID_DATAORDER_REVERSED: { 
-			    g_algManager.GenerateData(doReversed); 
-				g_algManager.RunAgain(); 
+				pAlgManager->GenerateData(doReversed);
+				pAlgManager->RunAgain();
 				break; 
 			}
 	    case ID_DATAORDER_RANDOMIZED: { 
-			    g_algManager.GenerateData(doRandomized); 
-				g_algManager.RunAgain(); 
+				pAlgManager->GenerateData(doRandomized);
+				pAlgManager->RunAgain();
 				break; 
 			}
 	    case ID_DATAORDER_SPECIALRANDOMIZED: { 
-			    g_algManager.GenerateData(doSpecialRandomized); 
-				g_algManager.RunAgain(); 
+				pAlgManager->GenerateData(doSpecialRandomized);
+				pAlgManager->RunAgain();
 				break; 
 			}
         case ID_DATAORDER_REGENERATE: {
@@ -517,31 +522,31 @@ bool OnMenuCommand(WORD iId, HMENU hMenu) {
 				break;
 			}
 		case ID_ELEMENTS_SETTO100: {
-				g_algManager.SetNumOfElements(100);
-				g_algManager.RunAgain();
+				pAlgManager->SetNumOfElements(100);
+				pAlgManager->RunAgain();
 				break;
 			}
 		case ID_ELEMENTS_SETTO20: {
-				g_algManager.SetNumOfElements(20);
-				g_algManager.RunAgain();
+			pAlgManager->SetNumOfElements(20);
+			pAlgManager->RunAgain();
 				break;
 			}
 	    case ID_ELEMENTS_SETTO200: {
-				g_algManager.SetNumOfElements(200);
-				g_algManager.RunAgain();
+			pAlgManager->SetNumOfElements(200);
+			pAlgManager->RunAgain();
 				break;
 			}
 	    case ID_ELEMENTS_INCREASE: {
-				g_algManager.SetNumOfElements(g_algManager.GetNumOfElements()+iElementsDelta);
-				g_algManager.RunAgain();
+			pAlgManager->SetNumOfElements(pAlgManager->GetNumOfElements()+iElementsDelta);
+			pAlgManager->RunAgain();
 				break;
 			}
 	    case ID_ELEMENTS_DECREASE: {
-			if (g_algManager.GetNumOfElements() > iElementsMin)
-				    g_algManager.SetNumOfElements(g_algManager.GetNumOfElements()-iElementsDelta);
-				g_algManager.RunAgain();
-				break;
-			}
+			if (pAlgManager->GetNumOfElements() > iElementsMin)
+				pAlgManager->SetNumOfElements(pAlgManager->GetNumOfElements()-iElementsDelta);
+			pAlgManager->RunAgain();
+			break;
+		}
 		case ID_VIEW_LIGHT: {
 			    g_bLight = !g_bLight;
 				CheckMenuItem(hMenu, iId, (g_bLight ? MF_CHECKED : MF_UNCHECKED));
@@ -549,7 +554,7 @@ bool OnMenuCommand(WORD iId, HMENU hMenu) {
 			}
 		case ID_VIEW_TEXTURED: {
 			    g_bTextured = !g_bTextured;
-				g_avSystem.m_bTextured = g_bTextured;
+				pAvSystem->m_bTextured = g_bTextured;
 				CheckMenuItem(hMenu, iId, (g_bTextured ? MF_CHECKED : MF_UNCHECKED));
 				break;
 			}
@@ -564,13 +569,13 @@ bool OnMenuCommand(WORD iId, HMENU hMenu) {
 				break;
 			}
 		case ID_VIEW_FRAME: {
-				g_avSystem.m_bFrame = !g_avSystem.m_bFrame;
-				CheckMenuItem(hMenu, iId, (g_avSystem.m_bFrame ? MF_CHECKED : MF_UNCHECKED));
+				pAvSystem->m_bFrame = !pAvSystem->m_bFrame;
+				CheckMenuItem(hMenu, iId, (pAvSystem->m_bFrame ? MF_CHECKED : MF_UNCHECKED));
 				break;
 			}
 		case ID_VIEW_HORIZ: {
-				g_avSystem.m_bHoriz = !g_avSystem.m_bHoriz;
-				CheckMenuItem(hMenu, iId, (g_avSystem.m_bHoriz ? MF_CHECKED : MF_UNCHECKED));
+			pAvSystem->m_bHoriz = !pAvSystem->m_bHoriz;
+				CheckMenuItem(hMenu, iId, (pAvSystem->m_bHoriz ? MF_CHECKED : MF_UNCHECKED));
 				break;
 			}
 		case ID_VIEW_INFO: {
@@ -579,13 +584,13 @@ bool OnMenuCommand(WORD iId, HMENU hMenu) {
 				break;
 			}
 		case ID_FLOW_PAUSE: {
-				g_algManager.SwapPause();
+				pAlgManager->SwapPause();
 				break;
 			}
-		case ID_FLOW_INCREASETEMPO: { g_algManager.SetTempo(g_algManager.GetTempo()+fTempoDelta); break; }
-		case ID_FLOW_DECREASETEMPO: { g_algManager.SetTempo(g_algManager.GetTempo()-fTempoDelta); break; }
-		case ID_FLOW_SETTOSLOW: { g_algManager.SetTempo(fTempoDelta); break; }
-		case ID_FLOW_SETTOFAST: { g_algManager.SetTempo(fTempoDelta*12); break; }
+		case ID_FLOW_INCREASETEMPO: { pAlgManager->SetTempo(pAlgManager->GetTempo()+fTempoDelta); break; }
+		case ID_FLOW_DECREASETEMPO: { pAlgManager->SetTempo(pAlgManager->GetTempo()-fTempoDelta); break; }
+		case ID_FLOW_SETTOSLOW: { pAlgManager->SetTempo(fTempoDelta); break; }
+		case ID_FLOW_SETTOFAST: { pAlgManager->SetTempo(fTempoDelta*12); break; }
 		case ID_HELP_ABOUT: {
 				MessageBox(NULL, "Created by Bart \"Fen\" Filipek\n9th April 2006, Updated in December 2019", "Info", MB_OK | MB_ICONQUESTION);
 				break;

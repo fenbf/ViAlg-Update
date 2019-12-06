@@ -27,7 +27,7 @@ enum ColorType { ctNormal, ctMarked, ctHighlighted };
 
 class CAVSystem {
 public:
-	CAVSystem();
+	CAVSystem(const CLog& logger);
 	~CAVSystem();
 
 	void SetDiagramBlockInfo(BlockType bType, const VECTOR3D &vCol, const VECTOR3D &vColMarked, 
@@ -52,6 +52,8 @@ private:
 	VECTOR3D m_vMaxSize;
 	VECTOR3D m_vSizeAsp;
 	int m_iLod;
+
+	const CLog& m_logger;
 };
 
 #endif // AV_SYSTEM_HPP

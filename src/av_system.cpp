@@ -17,7 +17,7 @@
 +-----------------------------------------------------------------------------*/
 
 // constructor:
-CAVSystem::CAVSystem():
+CAVSystem::CAVSystem(const CLog& logger):
     m_bType(btBox),
 	m_vCol(0.2f, 0.4f, 0.9f),
 	m_vColMarked(0.2f, 0.9f, 0.2f),
@@ -29,14 +29,15 @@ CAVSystem::CAVSystem():
 	m_bFrame(true),
 	m_vFrameCol(0.7f, 0.5f, 0.1f),
 	m_vMaxSize(0.0f, 0.0f, 0.0f),
-	m_vSizeAsp(0.0f, 0.0f, 0.0f)
-    {
-	CLog::Instance()->AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
+	m_vSizeAsp(0.0f, 0.0f, 0.0f),
+	m_logger(logger)
+{
+	m_logger.AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
 }
 
 // destructor:
 CAVSystem::~CAVSystem() {
-	CLog::Instance()->AddMsg(LogMode::Info, "%s cleanup", typeid(*this).name());
+	m_logger.AddMsg(LogMode::Info, "%s cleanup", typeid(*this).name());
 }
 
 void CAVSystem::SetDiagramBlockInfo(BlockType bType, const VECTOR3D &vCol, const VECTOR3D &vColMarked, 

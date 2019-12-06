@@ -91,7 +91,7 @@ bool CLog::Init(std::string filename) noexcept {
 | Return value:																   |
 |    none								                                       |
 +-----------------------------------------------------------------------------*/
-void CLog::AddMsg(LogMode lmMode, const char *szMsg, ...) noexcept {
+void CLog::AddMsg(LogMode lmMode, const char *szMsg, ...) const noexcept {
 	if (m_bEnabled == false)
 		return;
 	
