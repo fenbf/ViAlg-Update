@@ -25,28 +25,23 @@ Date and Time: ....
 */
 
 #include "clog.h"
+#include <string_view>
 
 /*-----------------------------------------------------------------------------+
 |                      Implementation of the CLog class                        |
 +-----------------------------------------------------------------------------*/
 
 // constructor:
-CLog::CLog():
+CLog::CLog() noexcept :
 	m_bEnabled(false)
 {
 	m_szFileName[0] = '\0';
 }
 
 // constructor 2:
-CLog::CLog(const char *szFileName)
+CLog::CLog(const char *szFileName) noexcept
 {
 	Init(szFileName);
-}
-
-// destructor:
-CLog::~CLog()
-{
-
 }
 
 /*-----------------------------------------------------------------------------+
@@ -60,7 +55,7 @@ CLog::~CLog()
 | Return value:																   |
 |    true if everything goes ok, unless false								   |
 +-----------------------------------------------------------------------------*/
-bool CLog::Init(const char *szFileName) {
+bool CLog::Init(const char *szFileName) noexcept {
 	strcpy_s(m_szFileName, szFileName);
 
 	// open clean file and write some basic info:
@@ -88,11 +83,12 @@ bool CLog::Init(const char *szFileName) {
 			   "<HEAD>\n"
 			   "<meta http-equiv=\"content-type\" content=\"text/html; charset=iso-8859-2\">"
 			   "<TITLE>Log File</TITLE>\n"
+			   "<style> p { font-family: Courier; margin:0;} .info { color: black; } .err {color: #aa6666;} .success {color:#66aa66;}</style>\n"
 			   "</HEAD>"
-			   "<BODY bgcolor=\"FFFFFF\">\n");
+			   "<BODY>\n");
 
-	fprintf(f, "<font style=\"font-size: medium; font-family: Courier; color: 4444ee\"> Log for the \"%s\" started!</font><br>\n", szModuleName);
-	fprintf(f, "<font style=\"font-size: medium; font-family: Courier; color: 4444ee\"> Date and time: %s </font><br>\n", timestring);
+	fprintf(f, "<p class=\"info\"> Log for the \"%s\" started!</p>\n", szModuleName);
+	fprintf(f, "<p class=\"info\"> Date and time: %s </p>\n", timestring);
 	fprintf(f, "</BODY>\n"
 		       "</HTML>\n");
 
@@ -112,7 +108,7 @@ bool CLog::Init(const char *szFileName) {
 | Return value:																   |
 |    none								                                       |
 +-----------------------------------------------------------------------------*/
-void CLog::AddMsg(LOG_MODE lmMode, const char *szMsg, ...) {
+void CLog::AddMsg(LOG_MODE lmMode, const char *szMsg, ...) noexcept {
 	if (m_bEnabled == false)
 		return;
 	
@@ -135,7 +131,7 @@ void CLog::AddMsg(LOG_MODE lmMode, const char *szMsg, ...) {
 
 	// overwrite last 16 characters - that is "</BODY>\n"..."
 	fseek(f, -18, SEEK_END);
-	fprintf(f, "<font style=\"font-size: small; font-family: Courier; color: %s\"> %s  </font><br> \n", GetColorName(lmMode), buf);
+	fprintf(f, "<p class=\"%s\"> %s  </p>\n", GetClassName(lmMode), buf);
 	fprintf(f, "</BODY>\n"
 		       "</HTML>\n");
 
@@ -154,8 +150,12 @@ void CLog::AddMsg(LOG_MODE lmMode, const char *szMsg, ...) {
 | Return value:																   |
 |    array of char that represent color fe. "ffeeff"						   |
 +-----------------------------------------------------------------------------*/
-const char *CLog::GetColorName(LOG_MODE lmMode) {
-	return LogColors[(int)lmMode];
+const char *CLog::GetClassName(LOG_MODE lmMode) const noexcept {
+	static constexpr std::string_view LogClasses[] = { "info", 
+												 		"err",  
+														"success" };
+
+	return LogClasses[(int)lmMode].data();
 }
 
 // end of file ----------------------------------------------------------------+

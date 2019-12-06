@@ -17,30 +17,25 @@
 #include <stdarg.h>
 #include <windows.h>
 
-enum LOG_MODE { lmNormal = 0, lmError, lmSuccess };
-
-const char LogColors[3][7] = { "000000",    // for lmNormal
-                               "aa6666",    // for lmError
-							   "66aa66" };  // for lmSuccess
+enum class LOG_MODE { lmNormal = 0, lmError, lmSuccess };
 
 /*-----------------------------------------------------------------------------+
 |                                The CLog class                                |
 +-----------------------------------------------------------------------------*/
 class CLog {
 public:
-	CLog();
-	CLog(const char *szFileName);
-	~CLog();
+	CLog() noexcept;
+	CLog(const char* szFileName) noexcept;
 
 	// methods:
-	bool Init(const char *szFileName);
-	void AddMsg(LOG_MODE lmMode, const char *szMsg, ...);
+	bool Init(const char* szFileName) noexcept;
+	void AddMsg(LOG_MODE lmMode, const char* szMsg, ...) noexcept;
 	
-	inline void Enable() { m_bEnabled = true; }
-	inline void Disable() { m_bEnabled = false; }
-	inline bool IsEnabled() { return m_bEnabled; }
+	inline void Enable() noexcept{ m_bEnabled = true; }
+	inline void Disable() noexcept { m_bEnabled = false; }
+	inline bool IsEnabled() const noexcept { return m_bEnabled; }
 private:
-	const char *GetColorName(LOG_MODE lmMode);
+	const char *GetClassName(LOG_MODE lmMode) const noexcept;
 
 	char m_szFileName[256];
 	bool m_bEnabled;

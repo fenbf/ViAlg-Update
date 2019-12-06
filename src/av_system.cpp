@@ -31,12 +31,12 @@ CAVSystem::CAVSystem():
 	m_vMaxSize(0.0f, 0.0f, 0.0f),
 	m_vSizeAsp(0.0f, 0.0f, 0.0f)
     {
-	g_Log.AddMsg(lmNormal, "%s initialisation", typeid(*this).name());
+	g_Log.AddMsg(LOG_MODE::lmNormal, "%s initialisation", typeid(*this).name());
 }
 
 // destructor:
 CAVSystem::~CAVSystem() {
-	g_Log.AddMsg(lmNormal, "%s cleanup", typeid(*this).name());
+	g_Log.AddMsg(LOG_MODE::lmNormal, "%s cleanup", typeid(*this).name());
 }
 
 void CAVSystem::SetDiagramBlockInfo(BlockType bType, const VECTOR3D &vCol, const VECTOR3D &vColMarked, 

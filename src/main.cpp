@@ -47,7 +47,7 @@ CGLLight g_Light;
 GLuint g_iTexFloor;
 GLuint g_iTexFrame;
 
-HANDLE hTimer = NULL;
+HANDLE hTimer = nullptr;
 
 // switches:
 bool g_bLight;
@@ -92,7 +92,7 @@ int WINAPI WinMain(HINSTANCE current_in, HINSTANCE prev_in, LPSTR cmdl, int n_sh
 		InitApp();
 	}
 	catch (exception &e) {
-		g_Log.AddMsg(lmError, "Exception was thrown: type: %s - message: %s", typeid(e).name(), e.what());
+		g_Log.AddMsg(LOG_MODE::lmError, "Exception was thrown: type: %s - message: %s", typeid(e).name(), e.what());
 		MessageBox(NULL, e.what(), "Exception!", MB_OK | MB_ICONSTOP);
 		CleanUp();
 		return 1;
@@ -148,10 +148,10 @@ void InitApp() {
 	sprintf_s(CGLApp::m_szTitle, "ViAlg");
 	
 	if (!g_glApp.Init(IDR_MENU1, &OnMenuCommand)) throw exception("Failed in initialising the Application");
-	else g_Log.AddMsg(lmSuccess, "Main window of the application has been created!");
+	else g_Log.AddMsg(LOG_MODE::lmSuccess, "Main window of the application has been created!");
 
 	if (!g_Timer.Init()) throw exception("High Performance Timer not available!");
-	else g_Log.AddMsg(lmSuccess, "High Performance Timer available!");
+	else g_Log.AddMsg(LOG_MODE::lmSuccess, "High Performance Timer available!");
 
 	g_glApp.SetRenderProc(&RenderScene);
 
@@ -199,7 +199,7 @@ void InitApp() {
 	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_INFO, MF_CHECKED);
 	g_bRegenerate = true;
 	CheckMenuItem(g_glApp.m_hMenu, ID_DATAORDER_REGENERATE, MF_CHECKED);
-	g_Log.AddMsg(lmSuccess, "App's menu fixed!");
+	g_Log.AddMsg(LOG_MODE::lmSuccess, "App's menu fixed!");
 
 	InitGL();
 
@@ -208,7 +208,7 @@ void InitApp() {
 	if (NULL == hTimer)
 		throw exception("CreateWaitableTimer failed");
 
-	g_Log.AddMsg(lmSuccess, "App initialised!");
+	g_Log.AddMsg(LOG_MODE::lmSuccess, "App initialised!");
 }
 
 /*-----------------------------------------------------------------------------+
@@ -227,7 +227,7 @@ void InitGL() {
 
 	glShadeModel(GL_SMOOTH);
 
-	if (CGLFont::Create2dCourierFont(&g_glApp, g_Font, 16, 8)) g_Log.AddMsg(lmSuccess, "Courier Font Created!");
+	if (CGLFont::Create2dCourierFont(&g_glApp, g_Font, 16, 8)) g_Log.AddMsg(LOG_MODE::lmSuccess, "Courier Font Created!");
 	else throw exception("Faild to create the courier font!");
 
 	// camera:
@@ -247,18 +247,18 @@ void InitGL() {
 
 	ResizeGLScene(g_glApp.m_iWidth, g_glApp.m_iHeight);
 
-	g_Log.AddMsg(lmSuccess, "OpenGL initialised!");
+	g_Log.AddMsg(LOG_MODE::lmSuccess, "OpenGL initialised!");
 }
 
 /*-----------------------------------------------------------------------------+
 |                                  CleanUp                                     |
 +-----------------------------------------------------------------------------*/
 void CleanUp() {
-	g_Log.AddMsg(lmNormal, "Closing the application...");
+	g_Log.AddMsg(LOG_MODE::lmNormal, "Closing the application...");
 
 	glDeleteTextures(1, &g_iTexFloor);
 	glDeleteTextures(1, &g_iTexFrame);
-	g_Log.AddMsg(lmNormal, "Textures were deleted...");
+	g_Log.AddMsg(LOG_MODE::lmNormal, "Textures were deleted...");
 
 	delete g_Algorithms[ABUBBLE_SORT];
 	delete g_Algorithms[ASHAKER_SORT];
@@ -273,7 +273,7 @@ void CleanUp() {
 	g_Font.Delete();
 	g_glApp.Destroy();
 
-	g_Log.AddMsg(lmSuccess, "Application was closed properly");
+	g_Log.AddMsg(LOG_MODE::lmSuccess, "Application was closed properly");
 }
 
 /*-----------------------------------------------------------------------------+

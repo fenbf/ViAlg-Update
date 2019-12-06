@@ -29,6 +29,7 @@ public:
 // the CViArray class ---------------------------------------------------------+
 // it beheaves like the std::vector class but it has ability to be drawn by
 // CAVSystem class
+// #refactor: holding the data + rendering, two different responsibilities, keep it simple!
 template <class T>
 class CViArray : public CViData {
 public:
