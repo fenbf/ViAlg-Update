@@ -12,6 +12,9 @@
 #include <exception>
 #include <typeinfo>
 #include <time.h>
+#include <vector>
+#include <memory>
+#include <map>
 
 #include "cgl_app.h"
 #include "clog.h"
@@ -37,8 +40,8 @@ const int iElementsDelta = 10;
 const int iElementsMin = 20;
 
 // global variables/objects ---------------------------------------------------+
+// #refactor: extract global state into a single class/wrapper
 CGLApp g_glApp;
-CLog g_Log;
 CTimer g_Timer;
 CGLFont g_Font;
 CCamera g_Camera;
@@ -58,18 +61,10 @@ bool g_bFloor;
 bool g_bInfo;
 bool g_bRegenerate;
 
-// algorithms:
-#define NUM_ALGORITHMS 6
-#define ABUBBLE_SORT 0
-#define ASHAKER_SORT 1
-#define ASELECTION_SORT 2
-#define AINSERTION_SORT 3
-#define ASHELL_SORT 4
-#define AQUICK_SORT 5
-
-CAlgorithm *g_Algorithms[NUM_ALGORITHMS];
-CAlgManager *g_algManager;
-CAVSystem *g_avSystem;
+std::vector<std::unique_ptr<CAlgorithm>> g_Algorithms; // #todo: make the vector const
+std::map<long, size_t> g_mapMenuIDToAlgIndex; // #todo: make the map const
+CAlgManager g_algManager;
+CAVSystem g_avSystem;
 
 // functions' prototypes ------------------------------------------------------+
 void InitApp();
@@ -159,29 +154,35 @@ void InitApp() {
     BuildSinCosTables();
 	srand((unsigned int)time(NULL));
 
-	g_Algorithms[ABUBBLE_SORT] = new CBubbleSortAlgorithm();
-	g_Algorithms[ASHAKER_SORT] = new CShakerSortAlgorithm();
-	g_Algorithms[ASELECTION_SORT] = new CSelectionSortAlgorithm();
-	g_Algorithms[AINSERTION_SORT] = new CInsertionSortAlgorithm();
-	g_Algorithms[ASHELL_SORT] = new CShellSortAlgorithm();
-	g_Algorithms[AQUICK_SORT] = new CQuickSortAlgorithm();
-	g_algManager = new CAlgManager();
-	g_algManager->SetTempo(3000.0);
-	g_algManager->SetNumOfElements(100);
-	g_algManager->GenerateData(doSpecialRandomized);
-	g_algManager->SetAlgorithm(g_Algorithms[ABUBBLE_SORT]);
+	g_Algorithms.emplace_back(new CBubbleSortAlgorithm());
+	g_Algorithms.emplace_back(new CShakerSortAlgorithm());
+	g_Algorithms.emplace_back(new CSelectionSortAlgorithm());
+	g_Algorithms.emplace_back(new CInsertionSortAlgorithm());
+	g_Algorithms.emplace_back(new CShellSortAlgorithm());
+	g_Algorithms.emplace_back(new CQuickSortAlgorithm());
 
-	g_avSystem = new CAVSystem();
-	g_avSystem->SetMaxSize(5.0f, 1.0f, 1.0f);
+	g_mapMenuIDToAlgIndex[ID_METHOD_BUBBLESORT] = 0;
+	g_mapMenuIDToAlgIndex[ID_METHOD_SHAKERSORT] = 1;
+	g_mapMenuIDToAlgIndex[ID_METHOD_SELECTIONSORT] = 2;
+	g_mapMenuIDToAlgIndex[ID_METHOD_INSERTIONSORT] = 3;
+	g_mapMenuIDToAlgIndex[ID_METHOD_SHELLSORT] = 4;
+	g_mapMenuIDToAlgIndex[ID_METHOD_QUICKSORT] = 5;
+
+	g_algManager.SetTempo(3000.0);
+	g_algManager.SetNumOfElements(100);
+	g_algManager.GenerateData(doSpecialRandomized);
+	g_algManager.SetAlgorithm(g_Algorithms[0].get());
+
+	g_avSystem.SetMaxSize(5.0f, 1.0f, 1.0f);
 
 	g_iTexFloor = LoadTextureFromBmp("data\\checker64.bmp", GL_BGR_EXT, GL_LINEAR_MIPMAP_LINEAR);
 	g_iTexFrame = LoadTextureFromBmp("data\\frame.bmp", GL_BGR_EXT, GL_LINEAR_MIPMAP_LINEAR);
 
-	g_avSystem->SetDiagramBlockInfo(btBox, VECTOR3D(0.2f, 0.3f, 0.7f),       // normal color
+	g_avSystem.SetDiagramBlockInfo(btBox, VECTOR3D(0.2f, 0.3f, 0.7f),       // normal color
 		                                  VECTOR3D(0.2f, 1.0f, 0.2f),        // marked
 										  VECTOR3D(0.4f, 0.6f, 0.99f));      // highlighted 
-	g_avSystem->SetOutlook(VECTOR3D(0.8f, 0.7f, 0.3f), g_iTexFrame);
-	g_avSystem->m_bTextured = false;
+	g_avSystem.SetOutlook(VECTOR3D(0.8f, 0.7f, 0.3f), g_iTexFrame);
+	g_avSystem.m_bTextured = false;
 
     // switches:
 	g_bLight = true;
@@ -192,9 +193,9 @@ void InitApp() {
 	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_REFLECTION, MF_CHECKED);
 	g_bFloor = true;
 	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_FLOOR, MF_CHECKED);
-	g_avSystem->m_bFrame = true;
+	g_avSystem.m_bFrame = true;
 	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_FRAME, MF_CHECKED);
-	g_avSystem->m_bHoriz = false;
+	g_avSystem.m_bHoriz = false;
 	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_HORIZ, MF_UNCHECKED);
 	g_bInfo = true;
 	CheckMenuItem(g_glApp.m_hMenu, ID_VIEW_INFO, MF_CHECKED);
@@ -261,15 +262,16 @@ void CleanUp() {
 	glDeleteTextures(1, &g_iTexFrame);
 	CLog::Instance()->AddMsg(LogMode::Info, "Textures were deleted...");
 
-	delete g_Algorithms[ABUBBLE_SORT];
-	delete g_Algorithms[ASHAKER_SORT];
-	delete g_Algorithms[ASELECTION_SORT];
-	delete g_Algorithms[AINSERTION_SORT];
-	delete g_Algorithms[ASHELL_SORT];
-	delete g_Algorithms[AQUICK_SORT];
+	// #notes: no need to deallocate this stuff now!
+	//delete g_Algorithms[ABUBBLE_SORT];
+	//delete g_Algorithms[ASHAKER_SORT];
+	//delete g_Algorithms[ASELECTION_SORT];
+	//delete g_Algorithms[AINSERTION_SORT];
+	//delete g_Algorithms[ASHELL_SORT];
+	//delete g_Algorithms[AQUICK_SORT];
 
-	delete g_avSystem;
-	delete g_algManager;
+	//delete g_avSystem;
+	//delete g_algManager;
 
 	g_Font.Delete();
 	g_glApp.Destroy();
@@ -333,7 +335,7 @@ void RenderScene() {
 			//glLightfv(GL_LIGHT0, GL_POSITION, light_pos);		
 			glFrontFace(GL_CW);
 			glTranslatef(0.0f, 0.3f, 0.0);
-			g_algManager->Render(g_avSystem);
+			g_algManager.Render(&g_avSystem);
 			glFrontFace(GL_CCW);
 		glPopMatrix();
 		glDisable(GL_CLIP_PLANE0);						// Disable Clip Plane For Drawing The Floor
@@ -354,7 +356,7 @@ void RenderScene() {
 	glPushMatrix();
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTranslatef(0.0f, 0.3f, 0.0);
-	    g_algManager->Render(g_avSystem);
+	    g_algManager.Render(&g_avSystem);
 	glPopMatrix();
 
 	// draw text: 
@@ -363,10 +365,10 @@ void RenderScene() {
 	        glColor3f(0.0f, 0.0f, 0.0f);
 		    glTextPrintf(&g_Font, 10.0f, 20.0f, "Fps: %2.3f", g_Timer.GetFps());
 			if (g_Timer.IsFreezed()) glTextout(&g_Font, "Algorithm paused", 500.0f, 20.0f);
-			else glTextPrintf(&g_Font, 500.0f, 20.0f, "Update tempo: %3.1f", g_algManager->GetTempo()/100.0);
-		    glTextPrintf(&g_Font, 10.0f, 34.0f, "Algorithm: %s", g_algManager->GetAlgorithmName());
-		    glTextPrintf(&g_Font, 10.0f, 48.0f, "Num of Elements: %d", g_algManager->GetNumOfElements());
-			glTextPrintf(&g_Font, 10.0f, 62.0f, "Elements order: %s", g_algManager->GetDataOrderName());
+			else glTextPrintf(&g_Font, 500.0f, 20.0f, "Update tempo: %3.1f", g_algManager.GetTempo()/100.0);
+		    glTextPrintf(&g_Font, 10.0f, 34.0f, "Algorithm: %s", g_algManager.GetAlgorithmName());
+		    glTextPrintf(&g_Font, 10.0f, 48.0f, "Num of Elements: %d", g_algManager.GetNumOfElements());
+			glTextPrintf(&g_Font, 10.0f, 62.0f, "Elements order: %s", g_algManager.GetDataOrderName());
 		    glTextPrintf(&g_Font, 10.0f, 76.0f, "Comparisions: %d", CAlgorithm::GetNumOfComparisions());
 		    glTextPrintf(&g_Font, 10.0f, 90.0f, "Exchanges: %d", CAlgorithm::GetNumOfExchanges());
 			glTextPrintf(&g_Font, 10.0f, 104.0f, "Iterations: %d", CAlgorithm::GetNumOfIterations());
@@ -409,7 +411,7 @@ void UpdateAnimation() {
 
 	if (g_Timer.IsFreezed()) return;
 
-	g_algManager->Update();
+	g_algManager.Update();
 }
 
 /*-----------------------------------------------------------------------------+
@@ -469,69 +471,44 @@ bool ProcessKeyboard() {
 bool OnMenuCommand(WORD iId, HMENU hMenu) {
 	switch ( iId ) {
 		case ID_FILE_EXIT: return false;
-		case ID_DIAGRAMTYPE_POINTS:    { g_avSystem->SetBlockType(btPoint); break; }
-		case ID_DIAGRAMTYPE_BOXES:     { g_avSystem->SetBlockType(btBox); break; }
-	    case ID_DIAGRAMTYPE_PYRAMIDS:  { g_avSystem->SetBlockType(btPyramid); break; }
-	    case ID_DIAGRAMTYPE_CYLINDERS: { g_avSystem->SetBlockType(btCylinder); break; }
+		case ID_DIAGRAMTYPE_POINTS:    { g_avSystem.SetBlockType(btPoint); break; }
+		case ID_DIAGRAMTYPE_BOXES:     { g_avSystem.SetBlockType(btBox); break; }
+	    case ID_DIAGRAMTYPE_PYRAMIDS:  { g_avSystem.SetBlockType(btPyramid); break; }
+	    case ID_DIAGRAMTYPE_CYLINDERS: { g_avSystem.SetBlockType(btCylinder); break; }
 		case ID_ALGORITHM_RUNAGAIN:    { 
-			    if (g_bRegenerate) g_algManager->RegenerateData(); 
-				g_algManager->RunAgain(); 
+			    if (g_bRegenerate) g_algManager.RegenerateData(); 
+				g_algManager.RunAgain(); 
 				break; 
 			}
-		case ID_METHOD_BUBBLESORT: {
-				g_algManager->SetAlgorithm(g_Algorithms[ABUBBLE_SORT]);
-				if (g_bRegenerate) g_algManager->RegenerateData();
-				g_algManager->RunAgain();
-				break;
-			}
-	    case ID_METHOD_SHAKERSORT: {
-				g_algManager->SetAlgorithm(g_Algorithms[ASHAKER_SORT]);
-				if (g_bRegenerate) g_algManager->RegenerateData();
-				g_algManager->RunAgain();
-				break;
-			}
-	    case ID_METHOD_SELECTIONSORT: {
-				g_algManager->SetAlgorithm(g_Algorithms[ASELECTION_SORT]);
-				if (g_bRegenerate) g_algManager->RegenerateData();
-				g_algManager->RunAgain();
-				break;
-			}
-	    case ID_METHOD_INSERTIONSORT: {
-				g_algManager->SetAlgorithm(g_Algorithms[AINSERTION_SORT]);
-				if (g_bRegenerate) g_algManager->RegenerateData();
-				g_algManager->RunAgain();
-				break;
-			}
-		case ID_METHOD_SHELLSORT: {
-				g_algManager->SetAlgorithm(g_Algorithms[ASHELL_SORT]);
-				if (g_bRegenerate) g_algManager->RegenerateData();
-				g_algManager->RunAgain();
-				break;
-			}
+		case ID_METHOD_BUBBLESORT: 
+		case ID_METHOD_SHAKERSORT: 
+		case ID_METHOD_SELECTIONSORT: 
+		case ID_METHOD_INSERTIONSORT: 
+		case ID_METHOD_SHELLSORT: 
 		case ID_METHOD_QUICKSORT: {
-			g_algManager->SetAlgorithm(g_Algorithms[AQUICK_SORT]);
-			if (g_bRegenerate) g_algManager->RegenerateData();
-			g_algManager->RunAgain();
-			break;
-		}
+				g_algManager.SetAlgorithm(g_Algorithms[g_mapMenuIDToAlgIndex[iId]].get());
+				if (g_bRegenerate) g_algManager.RegenerateData();
+				g_algManager.RunAgain();
+				break;
+			}
 		case ID_DATAORDER_SORTED: { 
-			    g_algManager->GenerateData(doSorted); 
-				g_algManager->RunAgain(); 
+			    g_algManager.GenerateData(doSorted); 
+				g_algManager.RunAgain(); 
 				break; 
 		    }
 		case ID_DATAORDER_REVERSED: { 
-			    g_algManager->GenerateData(doReversed); 
-				g_algManager->RunAgain(); 
+			    g_algManager.GenerateData(doReversed); 
+				g_algManager.RunAgain(); 
 				break; 
 			}
 	    case ID_DATAORDER_RANDOMIZED: { 
-			    g_algManager->GenerateData(doRandomized); 
-				g_algManager->RunAgain(); 
+			    g_algManager.GenerateData(doRandomized); 
+				g_algManager.RunAgain(); 
 				break; 
 			}
 	    case ID_DATAORDER_SPECIALRANDOMIZED: { 
-			    g_algManager->GenerateData(doSpecialRandomized); 
-				g_algManager->RunAgain(); 
+			    g_algManager.GenerateData(doSpecialRandomized); 
+				g_algManager.RunAgain(); 
 				break; 
 			}
         case ID_DATAORDER_REGENERATE: {
@@ -540,29 +517,29 @@ bool OnMenuCommand(WORD iId, HMENU hMenu) {
 				break;
 			}
 		case ID_ELEMENTS_SETTO100: {
-				g_algManager->SetNumOfElements(100);
-				g_algManager->RunAgain();
+				g_algManager.SetNumOfElements(100);
+				g_algManager.RunAgain();
 				break;
 			}
 		case ID_ELEMENTS_SETTO20: {
-				g_algManager->SetNumOfElements(20);
-				g_algManager->RunAgain();
+				g_algManager.SetNumOfElements(20);
+				g_algManager.RunAgain();
 				break;
 			}
 	    case ID_ELEMENTS_SETTO200: {
-				g_algManager->SetNumOfElements(200);
-				g_algManager->RunAgain();
+				g_algManager.SetNumOfElements(200);
+				g_algManager.RunAgain();
 				break;
 			}
 	    case ID_ELEMENTS_INCREASE: {
-				g_algManager->SetNumOfElements(g_algManager->GetNumOfElements()+iElementsDelta);
-				g_algManager->RunAgain();
+				g_algManager.SetNumOfElements(g_algManager.GetNumOfElements()+iElementsDelta);
+				g_algManager.RunAgain();
 				break;
 			}
 	    case ID_ELEMENTS_DECREASE: {
-			if (g_algManager->GetNumOfElements() > iElementsMin)
-				    g_algManager->SetNumOfElements(g_algManager->GetNumOfElements()-iElementsDelta);
-				g_algManager->RunAgain();
+			if (g_algManager.GetNumOfElements() > iElementsMin)
+				    g_algManager.SetNumOfElements(g_algManager.GetNumOfElements()-iElementsDelta);
+				g_algManager.RunAgain();
 				break;
 			}
 		case ID_VIEW_LIGHT: {
@@ -572,7 +549,7 @@ bool OnMenuCommand(WORD iId, HMENU hMenu) {
 			}
 		case ID_VIEW_TEXTURED: {
 			    g_bTextured = !g_bTextured;
-				g_avSystem->m_bTextured = g_bTextured;
+				g_avSystem.m_bTextured = g_bTextured;
 				CheckMenuItem(hMenu, iId, (g_bTextured ? MF_CHECKED : MF_UNCHECKED));
 				break;
 			}
@@ -587,13 +564,13 @@ bool OnMenuCommand(WORD iId, HMENU hMenu) {
 				break;
 			}
 		case ID_VIEW_FRAME: {
-				g_avSystem->m_bFrame = !g_avSystem->m_bFrame;
-				CheckMenuItem(hMenu, iId, (g_avSystem->m_bFrame ? MF_CHECKED : MF_UNCHECKED));
+				g_avSystem.m_bFrame = !g_avSystem.m_bFrame;
+				CheckMenuItem(hMenu, iId, (g_avSystem.m_bFrame ? MF_CHECKED : MF_UNCHECKED));
 				break;
 			}
 		case ID_VIEW_HORIZ: {
-				g_avSystem->m_bHoriz = !g_avSystem->m_bHoriz;
-				CheckMenuItem(hMenu, iId, (g_avSystem->m_bHoriz ? MF_CHECKED : MF_UNCHECKED));
+				g_avSystem.m_bHoriz = !g_avSystem.m_bHoriz;
+				CheckMenuItem(hMenu, iId, (g_avSystem.m_bHoriz ? MF_CHECKED : MF_UNCHECKED));
 				break;
 			}
 		case ID_VIEW_INFO: {
@@ -602,13 +579,13 @@ bool OnMenuCommand(WORD iId, HMENU hMenu) {
 				break;
 			}
 		case ID_FLOW_PAUSE: {
-				g_algManager->SwapPause();
+				g_algManager.SwapPause();
 				break;
 			}
-		case ID_FLOW_INCREASETEMPO: { g_algManager->SetTempo(g_algManager->GetTempo()+fTempoDelta); break; }
-		case ID_FLOW_DECREASETEMPO: { g_algManager->SetTempo(g_algManager->GetTempo()-fTempoDelta); break; }
-		case ID_FLOW_SETTOSLOW: { g_algManager->SetTempo(fTempoDelta); break; }
-		case ID_FLOW_SETTOFAST: { g_algManager->SetTempo(fTempoDelta*12); break; }
+		case ID_FLOW_INCREASETEMPO: { g_algManager.SetTempo(g_algManager.GetTempo()+fTempoDelta); break; }
+		case ID_FLOW_DECREASETEMPO: { g_algManager.SetTempo(g_algManager.GetTempo()-fTempoDelta); break; }
+		case ID_FLOW_SETTOSLOW: { g_algManager.SetTempo(fTempoDelta); break; }
+		case ID_FLOW_SETTOFAST: { g_algManager.SetTempo(fTempoDelta*12); break; }
 		case ID_HELP_ABOUT: {
 				MessageBox(NULL, "Created by Bart \"Fen\" Filipek\n9th April 2006, Updated in December 2019", "Info", MB_OK | MB_ICONQUESTION);
 				break;
