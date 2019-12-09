@@ -63,8 +63,7 @@ bool g_bRegenerate;
 struct AppState {
 	explicit AppState(const CLog& logger);
 
-	const std::vector<std::shared_ptr<CAlgorithm>> m_Algorithms;
-	const std::map<WORD, size_t> m_mapMenuIDToAlgIndex;
+	const std::map<WORD, std::unique_ptr<CAlgorithm>> m_mapIDAndAlgorithm;
 
 	CAlgManager m_algManager;
 	CAVSystem m_avSystem;
@@ -136,30 +135,31 @@ int WINAPI WinMain(HINSTANCE current_in, HINSTANCE prev_in, LPSTR cmdl, int n_sh
 	return 0;
 }
 
+template<typename Key, typename T, typename... Args>
+auto initFromMoveable(Args&&... args)
+{
+	std::map<Key, std::unique_ptr<T>> map;
+	(map.emplace(std::forward<Args>(args)), ...);
+	return map;
+}
+
 AppState::AppState(const CLog& logger) :
-	m_Algorithms{
-	std::make_shared<CBubbleSortAlgorithm>(logger),
-	std::make_shared<CShakerSortAlgorithm>(logger),
-	std::make_shared<CSelectionSortAlgorithm>(logger),
-	std::make_shared<CInsertionSortAlgorithm>(logger),
-	std::make_shared<CShellSortAlgorithm>(logger),
-	std::make_shared<CQuickSortAlgorithm>(logger)
-},
-m_mapMenuIDToAlgIndex{
-	{ ID_METHOD_BUBBLESORT, 0 },
-	{ ID_METHOD_SHAKERSORT, 1 },
-	{ ID_METHOD_SELECTIONSORT, 2 },
-	{ ID_METHOD_INSERTIONSORT, 3 },
-	{ ID_METHOD_SHELLSORT, 4 },
-	{ ID_METHOD_QUICKSORT, 5 }
-},
+	m_mapIDAndAlgorithm{ initFromMoveable<WORD, CAlgorithm>(
+		std::pair{ID_METHOD_BUBBLESORT, std::make_unique<CBubbleSortAlgorithm>(logger) },
+		std::pair{ID_METHOD_SHAKERSORT, std::make_unique<CShakerSortAlgorithm>(logger) },
+		std::pair{ID_METHOD_SELECTIONSORT, std::make_unique<CSelectionSortAlgorithm>(logger) },
+		std::pair{ID_METHOD_INSERTIONSORT, std::make_unique<CInsertionSortAlgorithm>(logger) },
+		std::pair{ID_METHOD_SHELLSORT, std::make_unique<CShellSortAlgorithm>(logger)},
+		std::pair{ID_METHOD_QUICKSORT, std::make_unique<CQuickSortAlgorithm>(logger) }
+)},
+
 m_algManager { logger},
 m_avSystem { logger}
 {
 	m_algManager.SetTempo(3000.0);
 	m_algManager.SetNumOfElements(100);
 	m_algManager.GenerateData(doSpecialRandomized);
-	m_algManager.SetAlgorithm(m_Algorithms[0].get());
+	m_algManager.SetAlgorithm(m_mapIDAndAlgorithm.at(ID_METHOD_INSERTIONSORT).get());
 
 	m_avSystem.SetMaxSize(5.0f, 1.0f, 1.0f);
 
@@ -506,7 +506,7 @@ bool OnMenuCommand(WORD iId, HMENU hMenu, std::any& param) {
 		case ID_METHOD_INSERTIONSORT: 
 		case ID_METHOD_SHELLSORT: 
 		case ID_METHOD_QUICKSORT: {
-			pAppState->m_algManager.SetAlgorithm(pAppState->m_Algorithms[pAppState->m_mapMenuIDToAlgIndex.at(iId)].get());
+			pAppState->m_algManager.SetAlgorithm(pAppState->m_mapIDAndAlgorithm.at(iId).get());
 			if (g_bRegenerate) pAppState->m_algManager.RegenerateData();
 			pAppState->m_algManager.RunAgain();
 			break;
