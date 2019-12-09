@@ -52,6 +52,7 @@
 #define ID_FLOW_SETTOSLOW               40047
 #define ID_FLOW_SETTOFAST               40048
 #define ID_ELEMENTS_SETTO200            40049
+#define ID_METHOD_SHUFFLE               40050
 
 // Next default values for new objects
 // 

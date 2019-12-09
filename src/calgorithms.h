@@ -146,6 +146,21 @@ private:
 	int m_iter;
 };
 
+// the CShellSortAlgorithm class ------------------------------------------+
+class CShuffleElementsAlgorithm : public CAlgorithm {
+public:
+	explicit CShuffleElementsAlgorithm(const CLog& logger);
+	~CShuffleElementsAlgorithm();
+
+	void Init(CViData* viData);
+	void Step();
+	void Stop();
+private:
+	CViArray<float>* m_viArray;
+	int m_i;
+	std::vector<int> m_randomOrder;
+};
+
 // the CAlgManager class ------------------------------------------------------+
 class CAlgManager {
 public:

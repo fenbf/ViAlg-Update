@@ -150,7 +150,8 @@ AppState::AppState(const CLog& logger) :
 		std::pair{ID_METHOD_SELECTIONSORT, std::make_unique<CSelectionSortAlgorithm>(logger) },
 		std::pair{ID_METHOD_INSERTIONSORT, std::make_unique<CInsertionSortAlgorithm>(logger) },
 		std::pair{ID_METHOD_SHELLSORT, std::make_unique<CShellSortAlgorithm>(logger)},
-		std::pair{ID_METHOD_QUICKSORT, std::make_unique<CQuickSortAlgorithm>(logger) }
+		std::pair{ID_METHOD_QUICKSORT, std::make_unique<CQuickSortAlgorithm>(logger) },
+		std::pair{ID_METHOD_SHUFFLE, std::make_unique<CShuffleElementsAlgorithm>(logger) }
 )},
 
 m_algManager { logger},
@@ -159,7 +160,7 @@ m_avSystem { logger}
 	m_algManager.SetTempo(3000.0);
 	m_algManager.SetNumOfElements(100);
 	m_algManager.GenerateData(doSpecialRandomized);
-	m_algManager.SetAlgorithm(m_mapIDAndAlgorithm.at(ID_METHOD_INSERTIONSORT).get());
+	m_algManager.SetAlgorithm(m_mapIDAndAlgorithm.at(ID_METHOD_SHUFFLE).get());
 
 	m_avSystem.SetMaxSize(5.0f, 1.0f, 1.0f);
 
@@ -505,7 +506,8 @@ bool OnMenuCommand(WORD iId, HMENU hMenu, std::any& param) {
 		case ID_METHOD_SELECTIONSORT: 
 		case ID_METHOD_INSERTIONSORT: 
 		case ID_METHOD_SHELLSORT: 
-		case ID_METHOD_QUICKSORT: {
+		case ID_METHOD_QUICKSORT: 
+		case ID_METHOD_SHUFFLE: {
 			pAppState->m_algManager.SetAlgorithm(pAppState->m_mapIDAndAlgorithm.at(iId).get());
 			if (g_bRegenerate) pAppState->m_algManager.RegenerateData();
 			pAppState->m_algManager.RunAgain();

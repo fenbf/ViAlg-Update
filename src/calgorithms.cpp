@@ -8,6 +8,9 @@
 +-----------------------------------------------------------------------------*/
 
 #include "calgorithms.h"
+#include <random>
+#include <algorithm>
+#include <numeric>
 
 /*-----------------------------------------------------------------------------+
 |                  Implementation of the CAlgorithm class                      |
@@ -523,6 +526,61 @@ void CQuickSortAlgorithm::Stop() {
 	m_viArray->SetSection(-1, -1);
 	m_bRunning = false;
 }
+
+/*-----------------------------------------------------------------------------+
+|               Implementation of the CShuffleElementsAlgorithm class               |
++-----------------------------------------------------------------------------*/
+
+CShuffleElementsAlgorithm::CShuffleElementsAlgorithm(const CLog& logger) : CAlgorithm(logger)
+{
+	m_viArray = NULL;
+	sprintf_s(m_strName, "Shuffle Elements");
+
+	m_logger.AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
+}
+
+CShuffleElementsAlgorithm::~CShuffleElementsAlgorithm() {
+	m_logger.AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
+}
+
+// the Init method ------------------------------------------------------------+
+void CShuffleElementsAlgorithm::Init(CViData* vData) {
+	m_viArray = dynamic_cast <CViArray<float>*>(vData);
+
+	m_i = 0;
+	auto rng = std::default_random_engine{};
+	m_randomOrder.resize(m_viArray->GetSize());
+	std::iota(std::begin(m_randomOrder), std::end(m_randomOrder), 0);
+	std::shuffle(std::begin(m_randomOrder), std::end(m_randomOrder), rng);
+
+	m_viArray->SetSection(0, m_viArray->GetSize() - 1);
+	CAlgorithm::ZeroStats();
+	m_bRunning = true;
+}
+
+// the Step method ------------------------------------------------------------+
+void CShuffleElementsAlgorithm::Step() {
+	if (!m_bRunning) return;
+
+	CAlgorithm::NextIteration();
+
+	if (m_i < m_randomOrder.size())
+	{
+		// swap:
+		auto a = m_randomOrder[m_i];
+		CAlgorithm::Exchange((*m_viArray)[m_i], (*m_viArray)[a]);
+		++m_i;
+	}
+	else
+		m_bRunning = false;
+}
+
+// the stop method ------------------------------------------------------------+
+void CShuffleElementsAlgorithm::Stop() {
+	m_viArray->SetSection(-1, -1);
+	m_bRunning = false;
+}
+
 
 /*-----------------------------------------------------------------------------+
 |                  Implementation of the CAlgManager class                     |

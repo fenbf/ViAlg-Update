@@ -68,6 +68,7 @@ BEGIN
             MENUITEM "Insertion Sort",              ID_METHOD_INSERTIONSORT
             MENUITEM "Shell Sort",                  ID_METHOD_SHELLSORT
             MENUITEM "Quick Sort",                  ID_METHOD_QUICKSORT
+            MENUITEM "Shuffle Elements",            ID_METHOD_SHUFFLE
         END
         POPUP "Data Order"
         BEGIN
