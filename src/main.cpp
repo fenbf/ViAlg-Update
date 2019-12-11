@@ -63,7 +63,7 @@ bool g_bRegenerate;
 struct AppState {
 	explicit AppState(const CLog& logger);
 
-	const std::map<WORD, std::unique_ptr<CAlgorithm>> m_mapIDAndAlgorithm;
+	const std::map<WORD, std::unique_ptr<IAlgorithm>> m_mapIDAndAlgorithm;
 
 	CAlgManager m_algManager;
 	CAVSystem m_avSystem;
@@ -144,7 +144,7 @@ auto initFromMoveable(Args&&... args)
 }
 
 AppState::AppState(const CLog& logger) :
-	m_mapIDAndAlgorithm{ initFromMoveable<WORD, CAlgorithm>(
+	m_mapIDAndAlgorithm{ initFromMoveable<WORD, IAlgorithm>(
 		std::pair{ID_METHOD_BUBBLESORT, std::make_unique<CBubbleSortAlgorithm>(logger) },
 		std::pair{ID_METHOD_SHAKERSORT, std::make_unique<CShakerSortAlgorithm>(logger) },
 		std::pair{ID_METHOD_SELECTIONSORT, std::make_unique<CSelectionSortAlgorithm>(logger) },
@@ -385,7 +385,7 @@ void RenderScene(AppState& appState) {
 		    glTextPrintf(&g_Font, 10.0f, 20.0f, "Fps: %2.3f", g_Timer.GetFps());
 			if (g_Timer.IsFreezed()) glTextout(&g_Font, "Algorithm paused", 500.0f, 20.0f);
 			else glTextPrintf(&g_Font, 500.0f, 20.0f, "Update tempo: %3.1f", appState.m_algManager.GetTempo()/100.0);
-		    glTextPrintf(&g_Font, 10.0f, 34.0f, "Algorithm: %s", appState.m_algManager.GetAlgorithmName());
+		    glTextPrintf(&g_Font, 10.0f, 34.0f, "Algorithm: %s", appState.m_algManager.GetAlgorithmName().c_str());
 		    glTextPrintf(&g_Font, 10.0f, 48.0f, "Num of Elements: %d", appState.m_algManager.GetNumOfElements());
 			glTextPrintf(&g_Font, 10.0f, 62.0f, "Elements order: %s", appState.m_algManager.GetDataOrderName());
 			auto stats = appState.m_algManager.GetCurrentStats();

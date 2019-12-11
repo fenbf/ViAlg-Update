@@ -38,10 +38,10 @@ private:
 
 // defines a basic interface for all algorithms
 // #refactor: extract AlgStats class
-class CAlgorithm {
+class IAlgorithm {
 public:
-	explicit CAlgorithm(const CLog& logger): m_bRunning(false), m_logger(logger) { }
-	virtual ~CAlgorithm() { }
+	explicit IAlgorithm(const std::string& name, const CLog& logger): m_bRunning(false), m_name(name), m_logger(logger) { }
+	virtual ~IAlgorithm() { }
 
 	virtual void Init(CViData *viData) = 0;
 	virtual void Step() = 0;
@@ -50,20 +50,20 @@ public:
 	void Pause() { m_bRunning = false; }
 	void Resume() { m_bRunning = true; }
 
-	const char *GetName() { return m_strName; }
+	const std::string& GetName() { return m_name; }
 	bool IsRunning() { return m_bRunning; }
 
 	const AlgOpsWrapper& GetStats() const noexcept { return m_stats; }
 
 protected:
 	bool m_bRunning;
-	char m_strName[64]{ 0 };		// it must be set in constructor
+	std::string m_name;
 	const CLog& m_logger;
 	AlgOpsWrapper m_stats;
 };
 
 // the CBubbleSortAlgorithm class ---------------------------------------------+
-class CBubbleSortAlgorithm : public CAlgorithm {
+class CBubbleSortAlgorithm : public IAlgorithm {
 public:
 	explicit CBubbleSortAlgorithm(const CLog& logger);
 	~CBubbleSortAlgorithm();
@@ -72,12 +72,13 @@ public:
 	void Step() override;
 	void Stop() override;
 private:
-	CViArray<float> *m_viArray;
-	int m_i, m_j;    // loop iterators
+	CViArray<float>* m_viArray{ nullptr };
+	int m_i{ 0 };
+	int m_j{ 0 };    // loop iterators
 };
 
 // the CShakerSortAlgorithm class ---------------------------------------------+
-class CShakerSortAlgorithm : public CAlgorithm {
+class CShakerSortAlgorithm : public IAlgorithm {
 public:
 	explicit CShakerSortAlgorithm(const CLog& logger);
 	~CShakerSortAlgorithm();
@@ -87,12 +88,14 @@ public:
 	void Stop() override;
 
 private:
-	CViArray<float> *m_viArray;
-	int m_i, m_j, m_j2;    // loop iterators
+	CViArray<float>* m_viArray{ nullptr };
+	int m_i{ 0 };
+	int m_j{ 0 };
+	int m_j2{ 0 };
 };
 
 // the CSelectionSortAlgorithm class ------------------------------------------+
-class CSelectionSortAlgorithm : public CAlgorithm {
+class CSelectionSortAlgorithm : public IAlgorithm {
 public:
 	explicit CSelectionSortAlgorithm(const CLog& logger);
 	~CSelectionSortAlgorithm();
@@ -102,13 +105,14 @@ public:
 	void Stop() override;
 
 private:
-	CViArray<float> *m_viArray;
-	int m_i, m_j;    // loop iterators
-	int m_iMin;
+	CViArray<float>* m_viArray{ nullptr };
+	int m_i{ 0 };
+	int m_j{ 0 };
+	int m_iMin{ 0 };
 };
 
 // the CInsertionSortAlgorithm class ------------------------------------------+
-class CInsertionSortAlgorithm : public CAlgorithm {
+class CInsertionSortAlgorithm : public IAlgorithm {
 public:
 	explicit CInsertionSortAlgorithm(const CLog& logger);
 	~CInsertionSortAlgorithm();
@@ -118,13 +122,14 @@ public:
 	void Stop() override;
 
 private:
-	CViArray<float> *m_viArray;
-	int m_i, m_j;       // loop iterators
-	float m_fValue;
+	CViArray<float>* m_viArray{ nullptr };
+	int m_i{ 0 };
+	int m_j{ 0 };
+	float m_fValue{ 0.0f };
 };
 
 // the CShellSortAlgorithm class ------------------------------------------+
-class CShellSortAlgorithm : public CAlgorithm {
+class CShellSortAlgorithm : public IAlgorithm {
 public:
 	explicit CShellSortAlgorithm(const CLog& logger);
 	~CShellSortAlgorithm();
@@ -133,14 +138,15 @@ public:
 	void Step() override;
 	void Stop() override;
 private:
-	CViArray<float> *m_viArray;
-	int m_i, m_j;       // loop iterators
-	int m_h;
-	float m_fValue;
+	CViArray<float>* m_viArray{ nullptr };
+	int m_i{ 0 };
+	int m_j{ 0 };
+	int m_h{ 0 };
+	float m_fValue{ 0.0f };
 };
 
 // the CShellSortAlgorithm class ------------------------------------------+
-class CQuickSortAlgorithm : public CAlgorithm {
+class CQuickSortAlgorithm : public IAlgorithm {
 public:
 	explicit CQuickSortAlgorithm(const CLog& logger);
 	~CQuickSortAlgorithm();
@@ -150,17 +156,17 @@ public:
 	void Stop() override;
 
 private:
-	CViArray<float>* m_viArray;
-	int m_l;
-	int m_h;
+	CViArray<float>* m_viArray{ nullptr };
+	int m_l{ 0 };
+	int m_h{ 0 };
 	std::stack<int> m_stack;
-	float m_valPartition;
-	int m_indexPartition;
-	int m_iter;
+	float m_valPartition{ 0.0f };
+	int m_indexPartition{ 0 };
+	int m_iter{ 0 };
 };
 
 // the CShellSortAlgorithm class ------------------------------------------+
-class CShuffleElementsAlgorithm : public CAlgorithm {
+class CShuffleElementsAlgorithm : public IAlgorithm {
 public:
 	explicit CShuffleElementsAlgorithm(const CLog& logger);
 	~CShuffleElementsAlgorithm();
@@ -170,8 +176,8 @@ public:
 	void Stop() override;
 
 private:
-	CViArray<float>* m_viArray;
-	int m_i;
+	CViArray<float>* m_viArray{ nullptr };
+	int m_i{ 0 };
 	std::vector<int> m_randomOrder;
 };
 
@@ -186,14 +192,14 @@ public:
 	void RunAgain();
 	void GenerateData(DataOrder dOrder);
 	void RegenerateData();
-	void SetAlgorithm(CAlgorithm *cAlg);
+	void SetAlgorithm(IAlgorithm *cAlg);
 	void SetNumOfElements(int iElems);
 
 	void SetTempo(double fTempo) { if (fTempo > 0.0) m_bBeat.SetTempoBPM(fTempo); }
 	double GetTempo() { return m_bBeat.GetTempoBPM(); }
 	void Pause(bool bPause) { m_bPause = bPause; }
 	void SwapPause() { m_bPause = ( m_bPause == true ? false : true ); }
-	const char *GetAlgorithmName() { return m_alg->GetName(); }
+	const std::string& GetAlgorithmName() { return m_alg->GetName(); }
 	int GetNumOfElements() { return m_viArray2.GetSize(); }
 	const char* GetDataOrderName() { return strDataOrderNames[(int)m_dOrder]; }
 
@@ -201,7 +207,7 @@ public:
 
 private:
 	CBeat m_bBeat;
-	CAlgorithm *m_alg;
+	IAlgorithm *m_alg;
 	bool m_bPause;
 	DataOrder m_dOrder;
 	CViArray<float> m_viArray;

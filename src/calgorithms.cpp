@@ -16,13 +16,7 @@
 |               Implementation of the CBubbleSortAlgorithm class               |
 +-----------------------------------------------------------------------------*/
 
-CBubbleSortAlgorithm::CBubbleSortAlgorithm(const CLog& logger): CAlgorithm(logger),
-    m_i(0),
-	m_j(0)
-{
-	m_viArray = NULL;
-	sprintf_s(m_strName, "Bubble Sort");
-
+CBubbleSortAlgorithm::CBubbleSortAlgorithm(const CLog& logger): IAlgorithm("Bubble Sort", logger) {
 	m_logger.AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
 }
 
@@ -80,14 +74,7 @@ void CBubbleSortAlgorithm::Stop() {
 |               Implementation of the CShakerSortAlgorithm class               |
 +-----------------------------------------------------------------------------*/
 
-CShakerSortAlgorithm::CShakerSortAlgorithm(const CLog& logger) : CAlgorithm(logger),
-    m_i(0),
-	m_j(0),
-	m_j2(0)
-{
-	m_viArray = NULL;
-	sprintf_s(m_strName, "Shaker Sort");
-
+CShakerSortAlgorithm::CShakerSortAlgorithm(const CLog& logger) : IAlgorithm("Shaker Sort", logger) {
 	m_logger.AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
 }
 
@@ -153,14 +140,7 @@ void CShakerSortAlgorithm::Stop() {
 |               Implementation of the CSelectionSortAlgorithm class               |
 +-----------------------------------------------------------------------------*/
 
-CSelectionSortAlgorithm::CSelectionSortAlgorithm(const CLog& logger) : CAlgorithm(logger),
-    m_i(0),
-	m_j(0),
-	m_iMin(0)
-{
-	m_viArray = NULL;
-	sprintf_s(m_strName, "Selection Sort");
-
+CSelectionSortAlgorithm::CSelectionSortAlgorithm(const CLog& logger) : IAlgorithm("Selection Sort", logger) {
 	m_logger.AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
 }
 
@@ -224,14 +204,7 @@ void CSelectionSortAlgorithm::Stop() {
 |               Implementation of the CInsertionSortAlgorithm class               |
 +-----------------------------------------------------------------------------*/
 
-CInsertionSortAlgorithm::CInsertionSortAlgorithm(const CLog& logger) : CAlgorithm(logger),
-    m_i(0),
-	m_j(0),
-	m_fValue(0.0f)
-{
-	m_viArray = NULL;
-	sprintf_s(m_strName, "Insertion Sort");
-
+CInsertionSortAlgorithm::CInsertionSortAlgorithm(const CLog& logger) : IAlgorithm("Insertion Sort", logger) {
 	m_logger.AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
 }
 
@@ -302,15 +275,7 @@ void CInsertionSortAlgorithm::Stop() {
 |               Implementation of the CShellSortAlgorithm class               |
 +-----------------------------------------------------------------------------*/
 
-CShellSortAlgorithm::CShellSortAlgorithm(const CLog& logger) : CAlgorithm(logger),
-    m_i(0),
-	m_j(0),
-	m_h(0),
-	m_fValue(0.0f)
-{
-	m_viArray = NULL;
-	sprintf_s(m_strName, "Shell Sort");
-
+CShellSortAlgorithm::CShellSortAlgorithm(const CLog& logger) : IAlgorithm("Shell Sort", logger) {
 	m_logger.AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
 }
 
@@ -375,7 +340,7 @@ void CShellSortAlgorithm::Step() {
 	m_fValue = (*m_viArray)[m_i];
 	m_viArray->SetSection(m_i, m_viArray->GetSize()-1);
 
-	sprintf_s(m_strName, "Shell Sort - %d sorting", m_h);
+	m_name = "Shell Sort " + std::to_string(m_h) + "-sorting";
 }
 
 // the stop method ------------------------------------------------------------+
@@ -448,11 +413,7 @@ void CShellSortAlgorithm::Stop() {
 //	}
 //}
 
-CQuickSortAlgorithm::CQuickSortAlgorithm(const CLog& logger) : CAlgorithm(logger)
-{
-	m_viArray = NULL;
-	sprintf_s(m_strName, "Quick Sort");
-
+CQuickSortAlgorithm::CQuickSortAlgorithm(const CLog& logger) : IAlgorithm("quick Sort", logger) {
 	m_logger.AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
 }
 
@@ -535,11 +496,7 @@ void CQuickSortAlgorithm::Stop() {
 |               Implementation of the CShuffleElementsAlgorithm class               |
 +-----------------------------------------------------------------------------*/
 
-CShuffleElementsAlgorithm::CShuffleElementsAlgorithm(const CLog& logger) : CAlgorithm(logger)
-{
-	m_viArray = NULL;
-	sprintf_s(m_strName, "Shuffle Elements");
-
+CShuffleElementsAlgorithm::CShuffleElementsAlgorithm(const CLog& logger) : IAlgorithm("Shuffle Elements", logger) {
 	m_logger.AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
 }
 
@@ -643,7 +600,7 @@ void CAlgManager::RegenerateData() {
 }
 
 // the SetAlgorithm method ----------------------------------------------------+
-void CAlgManager::SetAlgorithm(CAlgorithm *cAlg) {
+void CAlgManager::SetAlgorithm(IAlgorithm *cAlg) {
 	m_viArray.SetAdditionalMark(-1); 
 	m_alg = cAlg; 
 	m_alg->Init(&m_viArray);
