@@ -388,9 +388,10 @@ void RenderScene(AppState& appState) {
 		    glTextPrintf(&g_Font, 10.0f, 34.0f, "Algorithm: %s", appState.m_algManager.GetAlgorithmName());
 		    glTextPrintf(&g_Font, 10.0f, 48.0f, "Num of Elements: %d", appState.m_algManager.GetNumOfElements());
 			glTextPrintf(&g_Font, 10.0f, 62.0f, "Elements order: %s", appState.m_algManager.GetDataOrderName());
-		    glTextPrintf(&g_Font, 10.0f, 76.0f, "Comparisions: %d", CAlgorithm::GetNumOfComparisions());
-		    glTextPrintf(&g_Font, 10.0f, 90.0f, "Exchanges: %d", CAlgorithm::GetNumOfExchanges());
-			glTextPrintf(&g_Font, 10.0f, 104.0f, "Iterations: %d", CAlgorithm::GetNumOfIterations());
+			auto stats = appState.m_algManager.GetCurrentStats();
+		    glTextPrintf(&g_Font, 10.0f, 76.0f, "Comparisons: %d", stats.GetNumOfComparisions());
+		    glTextPrintf(&g_Font, 10.0f, 90.0f, "Exchanges: %d", stats.GetNumOfExchanges());
+			glTextPrintf(&g_Font, 10.0f, 104.0f, "Iterations: %d", stats.GetNumOfIterations());
 	    glEndText();
 	}
 }

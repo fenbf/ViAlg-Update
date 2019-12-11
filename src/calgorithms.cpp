@@ -13,14 +13,6 @@
 #include <numeric>
 
 /*-----------------------------------------------------------------------------+
-|                  Implementation of the CAlgorithm class                      |
-+-----------------------------------------------------------------------------*/
-
-int CAlgorithm::m_iComparisions = 0;
-int CAlgorithm::m_iExchanges = 0;
-int CAlgorithm::m_iIterations = 0;
-
-/*-----------------------------------------------------------------------------+
 |               Implementation of the CBubbleSortAlgorithm class               |
 +-----------------------------------------------------------------------------*/
 
@@ -45,7 +37,7 @@ void CBubbleSortAlgorithm::Init(CViData *viData) {
 	m_i = 0;
 	m_j = m_viArray->GetSize()-1;
 	m_viArray->SetSection(m_i, m_j);
-	CAlgorithm::ZeroStats();
+	m_stats.ZeroStats();
 	m_bRunning = true;
 }
 
@@ -59,9 +51,10 @@ void CBubbleSortAlgorithm::Step() {
 	//             CAlgorithm::CompExch(m_viArray[j-1], m_viArray[j]);
 	//     }
 
+	m_stats.NextIteration();
+
 	if (m_j > m_i) {
-		CAlgorithm::NextIteration();
-		CAlgorithm::CompExch((*m_viArray)[m_j-1],(*m_viArray)[m_j]);
+		m_stats.CompExch((*m_viArray)[m_j-1],(*m_viArray)[m_j]);
 		--m_j;
 	}
 	else {
@@ -110,7 +103,7 @@ void CShakerSortAlgorithm::Init(CViData *vData) {
 	m_j = m_viArray->GetSize()-1;    // backward
 	m_j2 = 0;                       // forward
 	m_viArray->SetSection(m_i, m_j);
-	CAlgorithm::ZeroStats();
+	m_stats.ZeroStats();
 	m_bRunning = true;
 }
 
@@ -126,10 +119,11 @@ void CShakerSortAlgorithm::Step() {
 	//         }
 	//     }
 
+	m_stats.NextIteration();
+
 	if (m_j > m_i) {
-		CAlgorithm::NextIteration();
-		CAlgorithm::CompExch((*m_viArray)[m_j-1], (*m_viArray)[m_j]);
-		CAlgorithm::CompExch2((*m_viArray)[m_j2+1], (*m_viArray)[m_j2]);
+		m_stats.CompExch((*m_viArray)[m_j-1], (*m_viArray)[m_j]);
+		m_stats.CompExch((*m_viArray)[m_j2], (*m_viArray)[m_j2 + 1]);
 		m_viArray->SetAdditionalMark(m_j-1);
 		--m_j;
 		++m_j2;
@@ -182,7 +176,7 @@ void CSelectionSortAlgorithm::Init(CViData *vData) {
 	m_j = 1;
 	m_iMin = m_i;
 	m_viArray->SetSection(m_i, m_viArray->GetSize()-1);
-	CAlgorithm::ZeroStats();
+	m_stats.ZeroStats();
 	m_bRunning = true;
 }
 
@@ -198,21 +192,24 @@ void CSelectionSortAlgorithm::Step() {
 	//         Exchange(m_viArray[i], m_viArray[m_iMin]);
 	//     }
 
+	m_stats.NextIteration();
+
 	if (m_j < m_viArray->GetSize()) {
-		CAlgorithm::NextIteration();
-		if (CAlgorithm::IsLittler((*m_viArray)[m_j], (*m_viArray)[m_iMin])) m_iMin = m_j;
+		if (m_stats.IsSmaller((*m_viArray)[m_j], (*m_viArray)[m_iMin])) 
+			m_iMin = m_j;
 		
 		++m_j;
 		return;
 	}
 	
-	Exchange((*m_viArray)[m_i], (*m_viArray)[m_iMin]);
+	m_stats.Exchange((*m_viArray)[m_i], (*m_viArray)[m_iMin]);
 	++m_i;
 	m_j = m_i+1;
 	m_iMin = m_i;
 	m_viArray->SetSection(m_i, m_viArray->GetSize()-1);
 
-	if (m_i >= m_viArray->GetSize()-1) m_bRunning = false;
+	if (m_i >= m_viArray->GetSize()-1) 
+		m_bRunning = false;
 }
 
 // the stop method ------------------------------------------------------------+
@@ -250,7 +247,7 @@ void CInsertionSortAlgorithm::Init(CViData *vData) {
 	m_j = 1;
 	m_fValue = (*m_viArray)[1];
 	m_viArray->SetSection(m_i, m_viArray->GetSize()-1);
-	CAlgorithm::ZeroStats();
+	m_stats.ZeroStats();
 	m_bRunning = true;
 }
 
@@ -269,20 +266,24 @@ void CInsertionSortAlgorithm::Step() {
 	//         m_viArray[j] = m_fValue;
 	//     }
 
-	if (m_j > 0 && CAlgorithm::IsBigger((*m_viArray)[m_j-1], m_fValue)) {
-		CAlgorithm::NextIteration();
+	m_stats.NextIteration();
+
+	if (m_j > 0 && m_stats.IsBigger((*m_viArray)[m_j-1], m_fValue)) {
 		(*m_viArray)[m_j] = (*m_viArray)[m_j-1];
-		CAlgorithm::NextChange();
+		m_stats.NextChange();
 		
 		--m_j;
 		return;
 	}
 	
 	(*m_viArray)[m_j] = m_fValue;
-	CAlgorithm::NextChange();
+	m_stats.NextChange();
 	++m_i;
 
-	if (m_i >= m_viArray->GetSize()) { m_bRunning = false; return; }
+	if (m_i >= m_viArray->GetSize()) { 
+		m_bRunning = false; 
+		return; 
+	}
 
 	m_j = m_i;
 	m_fValue = (*m_viArray)[m_i];
@@ -326,7 +327,7 @@ void CShellSortAlgorithm::Init(CViData *vData) {
 	m_j = m_h;
 	m_fValue = (*m_viArray)[m_i];
 	m_viArray->SetSection(m_i, m_viArray->GetSize()-1);
-	CAlgorithm::ZeroStats();
+	m_stats.ZeroStats();
 	m_bRunning = true;
 }
 
@@ -347,23 +348,26 @@ void CShellSortAlgorithm::Step() {
 	//            m_viArray[j] = m_fValue;
 	//        }   
 	//    }    
-	CAlgorithm::NextIteration();
+	m_stats.NextIteration();
 
-	if (m_j >= m_h && CAlgorithm::IsBigger((*m_viArray)[m_j-m_h], m_fValue)) {
+	if (m_j >= m_h && m_stats.IsBigger((*m_viArray)[m_j-m_h], m_fValue)) {
 		(*m_viArray)[m_j] = (*m_viArray)[m_j-m_h];
-		CAlgorithm::NextChange();
+		m_stats.NextChange();
 		
 		m_j-=m_h;
 		return;
 	}
 	
 	(*m_viArray)[m_j] = m_fValue;
-	CAlgorithm::NextChange();
+	m_stats.NextChange();
 	++m_i;
 
 	if (m_i >= m_viArray->GetSize()) {
 		m_h /= 3;
-		if (m_h < 1) { m_bRunning = false; return; }
+		if (m_h < 1) { 
+			m_bRunning = false; 
+			return; 
+		}
 		m_i = m_h;
 	}
 
@@ -468,7 +472,7 @@ void CQuickSortAlgorithm::Init(CViData* vData) {
 	m_indexPartition = -1;
 
 	m_viArray->SetSection(0, m_h);
-	CAlgorithm::ZeroStats();
+	m_stats.ZeroStats();
 	m_bRunning = true;
 }
 
@@ -476,14 +480,14 @@ void CQuickSortAlgorithm::Init(CViData* vData) {
 void CQuickSortAlgorithm::Step() {
 	if (!m_bRunning) return;
 
-	CAlgorithm::NextIteration();
+	m_stats.NextIteration();
 
 	if (m_iter < m_h)
 	{
-		if (CAlgorithm::IsBigger(m_valPartition, (*m_viArray)[m_iter]))
+		if (m_stats.IsBigger(m_valPartition, (*m_viArray)[m_iter]))
 		{
 			m_indexPartition++;
-			CAlgorithm::Exchange((*m_viArray)[m_indexPartition], (*m_viArray)[m_iter]);
+			m_stats.Exchange((*m_viArray)[m_indexPartition], (*m_viArray)[m_iter]);
 		}
 		m_iter++;
 		return;
@@ -491,7 +495,7 @@ void CQuickSortAlgorithm::Step() {
 	
 	// (m_iterPartition == m_h) // finish partition...
 	m_indexPartition++;
-	CAlgorithm::Exchange((*m_viArray)[m_indexPartition], (*m_viArray)[m_h]);
+	m_stats.Exchange((*m_viArray)[m_indexPartition], (*m_viArray)[m_h]);
 
 	if (m_indexPartition - 1 > m_l)
 	{
@@ -554,7 +558,7 @@ void CShuffleElementsAlgorithm::Init(CViData* vData) {
 	std::shuffle(std::begin(m_randomOrder), std::end(m_randomOrder), rng);
 
 	m_viArray->SetSection(0, m_viArray->GetSize() - 1);
-	CAlgorithm::ZeroStats();
+	m_stats.ZeroStats();
 	m_bRunning = true;
 }
 
@@ -562,13 +566,13 @@ void CShuffleElementsAlgorithm::Init(CViData* vData) {
 void CShuffleElementsAlgorithm::Step() {
 	if (!m_bRunning) return;
 
-	CAlgorithm::NextIteration();
+	m_stats.NextIteration();
 
 	if (m_i < m_randomOrder.size())
 	{
 		// swap:
 		auto a = m_randomOrder[m_i];
-		CAlgorithm::Exchange((*m_viArray)[m_i], (*m_viArray)[a]);
+		m_stats.Exchange((*m_viArray)[m_i], (*m_viArray)[a]);
 		++m_i;
 	}
 	else
@@ -598,7 +602,7 @@ CAlgManager::CAlgManager(const CLog& logger):
 	m_logger.AddMsg(LogMode::Info, "%s - initialised", typeid(*this).name());
 }
 
-// destructor:
+// destructor: #simplification: do we really need to log this here?
 CAlgManager::~CAlgManager() {
 	m_logger.AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
 }

@@ -14,8 +14,6 @@
 #include <windows.h>
 #include <gl/gl.h>
 #include <gl/glu.h>
-#include <exception>
-#include <cstdio>
 
 // this is only a temporary unit, in the future it must be improved!
 // normally it should have cTexManager class that manages all textures in App

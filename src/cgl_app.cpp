@@ -213,8 +213,8 @@ bool CGLApp::Destroy() {
 	}
 
 	// Rendering Context:
-	if (m_hRC != NULL) {
-		wglMakeCurrent(m_hDC, NULL);
+	if (m_hRC != nullptr) {
+		wglMakeCurrent(m_hDC, nullptr);
 		wglDeleteContext(m_hRC);
 		m_hRC = NULL;
 	}

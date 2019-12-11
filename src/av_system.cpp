@@ -35,7 +35,7 @@ CAVSystem::CAVSystem(const CLog& logger):
 	m_logger.AddMsg(LogMode::Info, "%s initialisation", typeid(*this).name());
 }
 
-// destructor:
+// destructor: #simplification: do we really need to log this here?
 CAVSystem::~CAVSystem() {
 	m_logger.AddMsg(LogMode::Info, "%s cleanup", typeid(*this).name());
 }

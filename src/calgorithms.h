@@ -14,7 +14,30 @@
 #include "clog.h"
 #include <stack>
 
-// the CAlgorithm class -------------------------------------------------------+
+// class that wraps the operations used by algorithms and cals stats that can be presented later
+class AlgOpsWrapper {
+public:
+	template <class T> void Exchange(T& a, T& b) noexcept { T t = a; a = b; b = t; ++m_iExchanges; }
+	template <class T> void CompExch(T& a, T& b) noexcept { if (IsBigger(a, b)) Exchange(a, b); }
+	template <class T> bool IsBigger(const T& a, const T& b) noexcept { ++m_iComparisions; return (a > b); }
+	template <class T> bool IsSmaller(const T& a, const T& b) noexcept { ++m_iComparisions; return (a < b); }
+
+	void NextIteration() noexcept { ++m_iIterations; }
+	void NextChange() noexcept { ++m_iExchanges; }
+
+	uint32_t GetNumOfComparisions() const noexcept { return m_iComparisions; }
+	uint32_t GetNumOfExchanges() const noexcept { return m_iExchanges; }
+	uint32_t GetNumOfIterations() const noexcept { return m_iIterations; }
+	void ZeroStats() noexcept { m_iComparisions = 0; m_iExchanges = 0; m_iIterations = 0; }
+
+private:
+	uint32_t m_iComparisions{ 0 };
+	uint32_t m_iExchanges{ 0 };
+	uint32_t m_iIterations{ 0 };
+};
+
+// defines a basic interface for all algorithms
+// #refactor: extract AlgStats class
 class CAlgorithm {
 public:
 	explicit CAlgorithm(const CLog& logger): m_bRunning(false), m_logger(logger) { }
@@ -30,27 +53,13 @@ public:
 	const char *GetName() { return m_strName; }
 	bool IsRunning() { return m_bRunning; }
 
-	template <class T> static void Exchange(T &a, T &b) { T t = a; a = b; b = t; ++m_iExchanges; }
-	template <class T> static void CompExch(T &a, T &b) { if (IsBigger(a, b)) Exchange(a, b); }
-	template <class T> static void CompExch2(T &a, T &b) { if (IsLittler(a, b)) Exchange(a, b); }
-	template <class T> static bool IsBigger(T &a, T &b) { ++m_iComparisions; return (a > b); }
-	template <class T> static bool IsLittler(T &a, T &b) { ++m_iComparisions; return (a < b); }
-	static void NextIteration() { ++m_iIterations; }
-	static void NextChange() { ++m_iExchanges; }
-	
-	static int GetNumOfComparisions() { return m_iComparisions; }
-	static int GetNumOfExchanges() { return m_iExchanges; }
-	static int GetNumOfIterations() { return m_iIterations; }
-	static void ZeroStats() { m_iComparisions = 0; m_iExchanges = 0; m_iIterations = 0; }
-private:
-	static int m_iComparisions;
-	static int m_iExchanges;
-	static int m_iIterations;
+	const AlgOpsWrapper& GetStats() const noexcept { return m_stats; }
 
 protected:
 	bool m_bRunning;
-	char m_strName[64];		// it must be set in constructor
+	char m_strName[64]{ 0 };		// it must be set in constructor
 	const CLog& m_logger;
+	AlgOpsWrapper m_stats;
 };
 
 // the CBubbleSortAlgorithm class ---------------------------------------------+
@@ -59,9 +68,9 @@ public:
 	explicit CBubbleSortAlgorithm(const CLog& logger);
 	~CBubbleSortAlgorithm();
 
-	void Init(CViData *viData);
-	void Step();
-	void Stop();
+	void Init(CViData* viData) override;
+	void Step() override;
+	void Stop() override;
 private:
 	CViArray<float> *m_viArray;
 	int m_i, m_j;    // loop iterators
@@ -73,9 +82,10 @@ public:
 	explicit CShakerSortAlgorithm(const CLog& logger);
 	~CShakerSortAlgorithm();
 
-	void Init(CViData *viData);
-	void Step();
-	void Stop();
+	void Init(CViData *viData) override;
+	void Step() override;
+	void Stop() override;
+
 private:
 	CViArray<float> *m_viArray;
 	int m_i, m_j, m_j2;    // loop iterators
@@ -87,9 +97,10 @@ public:
 	explicit CSelectionSortAlgorithm(const CLog& logger);
 	~CSelectionSortAlgorithm();
 
-	void Init(CViData *viData);
-	void Step();
-	void Stop();
+	void Init(CViData *viData) override;
+	void Step() override;
+	void Stop() override;
+
 private:
 	CViArray<float> *m_viArray;
 	int m_i, m_j;    // loop iterators
@@ -102,9 +113,10 @@ public:
 	explicit CInsertionSortAlgorithm(const CLog& logger);
 	~CInsertionSortAlgorithm();
 
-	void Init(CViData *viData);
-	void Step();
-	void Stop();
+	void Init(CViData *viData) override;
+	void Step() override;
+	void Stop() override;
+
 private:
 	CViArray<float> *m_viArray;
 	int m_i, m_j;       // loop iterators
@@ -117,9 +129,9 @@ public:
 	explicit CShellSortAlgorithm(const CLog& logger);
 	~CShellSortAlgorithm();
 
-	void Init(CViData *viData);
-	void Step();
-	void Stop();
+	void Init(CViData *viData) override;
+	void Step() override;
+	void Stop() override;
 private:
 	CViArray<float> *m_viArray;
 	int m_i, m_j;       // loop iterators
@@ -133,9 +145,10 @@ public:
 	explicit CQuickSortAlgorithm(const CLog& logger);
 	~CQuickSortAlgorithm();
 
-	void Init(CViData* viData);
-	void Step();
-	void Stop();
+	void Init(CViData* viData) override;
+	void Step() override;
+	void Stop() override;
+
 private:
 	CViArray<float>* m_viArray;
 	int m_l;
@@ -152,16 +165,17 @@ public:
 	explicit CShuffleElementsAlgorithm(const CLog& logger);
 	~CShuffleElementsAlgorithm();
 
-	void Init(CViData* viData);
-	void Step();
-	void Stop();
+	void Init(CViData* viData) override;
+	void Step() override;
+	void Stop() override;
+
 private:
 	CViArray<float>* m_viArray;
 	int m_i;
 	std::vector<int> m_randomOrder;
 };
 
-// the CAlgManager class ------------------------------------------------------+
+// binds and manages the currently selected algorithm with the array that we work with
 class CAlgManager {
 public:
 	explicit CAlgManager(const CLog& logger);
@@ -182,6 +196,9 @@ public:
 	const char *GetAlgorithmName() { return m_alg->GetName(); }
 	int GetNumOfElements() { return m_viArray2.GetSize(); }
 	const char* GetDataOrderName() { return strDataOrderNames[(int)m_dOrder]; }
+
+	const AlgOpsWrapper& GetCurrentStats() const { return m_alg->GetStats(); }
+
 private:
 	CBeat m_bBeat;
 	CAlgorithm *m_alg;
@@ -189,6 +206,7 @@ private:
 	DataOrder m_dOrder;
 	CViArray<float> m_viArray;
 	CViArray<float> m_viArray2;
+	std::vector<float> m_array; // the array that all algorithms operate on
 
 	const CLog& m_logger;
 };

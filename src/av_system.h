@@ -25,6 +25,7 @@
 enum BlockType { btPoint, btBox, btPyramid, btCylinder };
 enum ColorType { ctNormal, ctMarked, ctHighlighted };
 
+// this class provides a basic functionality of drawing chart shapes
 class CAVSystem {
 public:
 	CAVSystem(const CLog& logger);
@@ -38,9 +39,12 @@ public:
 	void SetMaxSize(float fWidth, float fHeight, float fDepth) { m_vMaxSize = VECTOR3D(fWidth, fHeight, fDepth); }
 	void SetOutlook(const VECTOR3D &vFrameCol, GLuint iFrameTex);
 	void SetBlockType(BlockType bType) { m_bType = bType; }
+
+	// #refactor: some variables have getters/setters some not...
 	bool m_bHoriz;
 	bool m_bFrame;
 	bool m_bTextured;
+
 private:
 	BlockType m_bType;
 	VECTOR3D m_vCol;
