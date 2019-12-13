@@ -13,6 +13,7 @@
 
 #include "av_system.h"
 #include <vector>
+#include <random>
 
 enum DataOrder { doSorted = 0, doReversed, doRandomized, doSpecialRandomized };
 const char strDataOrderNames[4][24] = { "Sorted", "Reversed", "Randomized", "Special Randomized" };
@@ -100,6 +101,11 @@ void CViArray<T>::Render(CAVSystem *avSystem) {
 template <class T>
 void CViArray<T>::Generate(DataOrder dOrder) {
 	T tAsp = (T)(1.0/(double)m_vArray.size());
+
+	static std::random_device dev;
+	static std::mt19937 rng(dev());
+
+
 	switch ( dOrder ) {
 		case doSorted: {
 			for (size_t i = 0; i < m_vArray.size(); ++i)
@@ -112,18 +118,16 @@ void CViArray<T>::Generate(DataOrder dOrder) {
 			break;
 			}
 	   case doRandomized: {
-			for (size_t i = 0; i < m_vArray.size(); ++i)
-				m_vArray[i] = (T)(((double)rand()/RAND_MAX)*(double)i*tAsp);
+		   std::uniform_real_distribution<> dist;
+		   for (size_t i = 0; i < m_vArray.size(); ++i)
+			   m_vArray[i] = (T)(dist(rng));
 			break;
 			}
 	   case doSpecialRandomized: {
+			std::uniform_int_distribution<> dist(1, m_vArray.size());
 			for (size_t i = 0; i < m_vArray.size(); ++i)
-				m_vArray[i] = (T)(tAsp*(double)(i+1));
-			for (size_t i = 0; i < 10*m_vArray.size(); ++i) {
-				int a = rand()%(int)m_vArray.size();
-				int b = rand()%(int)m_vArray.size();
-				Swap(m_vArray[a], m_vArray[b]);
-			}
+				m_vArray[i] = (T)(tAsp * (double)(i + 1));
+			std::shuffle(m_vArray.begin(), m_vArray.end(), rng);
 			break;
 		}
 	}
