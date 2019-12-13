@@ -13,8 +13,10 @@
 #include "ctimer.h"
 #include "clog.h"
 #include <stack>
+#include <memory>
 
-// class that wraps the operations used by algorithms and cals stats that can be presented later
+
+// class that wraps the operations used by algorithms and calculates stats that can be presented later
 class AlgOpsWrapper {
 public:
 	template <class T> void Exchange(T& a, T& b) noexcept { T t = a; a = b; b = t; ++m_iExchanges; }
@@ -40,8 +42,8 @@ private:
 // #refactor: extract AlgStats class
 class IAlgorithm {
 public:
-	explicit IAlgorithm(const std::string& name, const CLog& logger): m_bRunning(false), m_name(name), m_logger(logger) { }
-	virtual ~IAlgorithm() { }
+	explicit IAlgorithm(const std::string& name): m_bRunning(false), m_name(name) { }
+	virtual ~IAlgorithm() noexcept { }
 
 	virtual void Init(CViData *viData) = 0;
 	virtual void Step() = 0;
@@ -58,15 +60,21 @@ public:
 protected:
 	bool m_bRunning;
 	std::string m_name;
-	const CLog& m_logger;
 	AlgOpsWrapper m_stats;
+};
+
+// class that has a role of creating new algorithm classes, based on the ID we pass
+// for now we use ID that are UI menu options
+class AlgorithmFactory
+{
+public:
+	static std::unique_ptr<IAlgorithm> Create(WORD algID);
 };
 
 // the CBubbleSortAlgorithm class ---------------------------------------------+
 class CBubbleSortAlgorithm : public IAlgorithm {
 public:
-	explicit CBubbleSortAlgorithm(const CLog& logger);
-	~CBubbleSortAlgorithm();
+	explicit CBubbleSortAlgorithm() : IAlgorithm("Bubble Sort") { }
 
 	void Init(CViData* viData) override;
 	void Step() override;
@@ -80,8 +88,7 @@ private:
 // the CShakerSortAlgorithm class ---------------------------------------------+
 class CShakerSortAlgorithm : public IAlgorithm {
 public:
-	explicit CShakerSortAlgorithm(const CLog& logger);
-	~CShakerSortAlgorithm();
+	explicit CShakerSortAlgorithm() : IAlgorithm("Shaker Sort") { }
 
 	void Init(CViData *viData) override;
 	void Step() override;
@@ -97,8 +104,7 @@ private:
 // the CSelectionSortAlgorithm class ------------------------------------------+
 class CSelectionSortAlgorithm : public IAlgorithm {
 public:
-	explicit CSelectionSortAlgorithm(const CLog& logger);
-	~CSelectionSortAlgorithm();
+	explicit CSelectionSortAlgorithm() : IAlgorithm("Selection Sort") { }
 
 	void Init(CViData *viData) override;
 	void Step() override;
@@ -114,8 +120,7 @@ private:
 // the CInsertionSortAlgorithm class ------------------------------------------+
 class CInsertionSortAlgorithm : public IAlgorithm {
 public:
-	explicit CInsertionSortAlgorithm(const CLog& logger);
-	~CInsertionSortAlgorithm();
+	explicit CInsertionSortAlgorithm() : IAlgorithm("Insertion Sort") { }
 
 	void Init(CViData *viData) override;
 	void Step() override;
@@ -131,8 +136,7 @@ private:
 // the CShellSortAlgorithm class ------------------------------------------+
 class CShellSortAlgorithm : public IAlgorithm {
 public:
-	explicit CShellSortAlgorithm(const CLog& logger);
-	~CShellSortAlgorithm();
+	explicit CShellSortAlgorithm() : IAlgorithm("Shell Sort") { }
 
 	void Init(CViData *viData) override;
 	void Step() override;
@@ -148,8 +152,7 @@ private:
 // the CShellSortAlgorithm class ------------------------------------------+
 class CQuickSortAlgorithm : public IAlgorithm {
 public:
-	explicit CQuickSortAlgorithm(const CLog& logger);
-	~CQuickSortAlgorithm();
+	explicit CQuickSortAlgorithm() : IAlgorithm("Quick Sort") { }
 
 	void Init(CViData* viData) override;
 	void Step() override;
@@ -168,8 +171,7 @@ private:
 // the CShellSortAlgorithm class ------------------------------------------+
 class CShuffleElementsAlgorithm : public IAlgorithm {
 public:
-	explicit CShuffleElementsAlgorithm(const CLog& logger);
-	~CShuffleElementsAlgorithm();
+	explicit CShuffleElementsAlgorithm() : IAlgorithm("Shuffle Elements") { }
 
 	void Init(CViData* viData) override;
 	void Step() override;
@@ -192,24 +194,24 @@ public:
 	void RunAgain();
 	void GenerateData(DataOrder dOrder);
 	void RegenerateData();
-	void SetAlgorithm(IAlgorithm *cAlg);
+	void SetAlgorithm(WORD algID);
 	void SetNumOfElements(int iElems);
 
 	void SetTempo(double fTempo) { if (fTempo > 0.0) m_bBeat.SetTempoBPM(fTempo); }
 	double GetTempo() { return m_bBeat.GetTempoBPM(); }
 	void Pause(bool bPause) { m_bPause = bPause; }
 	void SwapPause() { m_bPause = ( m_bPause == true ? false : true ); }
-	const std::string& GetAlgorithmName() { return m_alg->GetName(); }
+	const std::string& GetAlgorithmName() { return m_pCurrentAlg->GetName(); }
 	int GetNumOfElements() { return m_viArray2.GetSize(); }
 	const char* GetDataOrderName() { return strDataOrderNames[(int)m_dOrder]; }
 
-	const AlgOpsWrapper& GetCurrentStats() const { return m_alg->GetStats(); }
+	const AlgOpsWrapper& GetCurrentStats() const { return m_pCurrentAlg->GetStats(); }
 
 private:
 	CBeat m_bBeat;
-	IAlgorithm *m_alg;
-	bool m_bPause;
-	DataOrder m_dOrder;
+	std::unique_ptr<IAlgorithm> m_pCurrentAlg;
+	bool m_bPause{ false };
+	DataOrder m_dOrder{ doSpecialRandomized };
 	CViArray<float> m_viArray;
 	CViArray<float> m_viArray2;
 	std::vector<float> m_array; // the array that all algorithms operate on

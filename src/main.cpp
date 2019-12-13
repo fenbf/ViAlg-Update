@@ -60,10 +60,16 @@ bool g_bFloor;
 bool g_bInfo;
 bool g_bRegenerate;
 
+template<typename Key, typename T, typename... Args>
+auto initFromMoveable(Args&&... args)
+{
+	std::map<Key, std::unique_ptr<T>> map;
+	(map.emplace(std::forward<Args>(args)), ...);
+	return map;
+}
+
 struct AppState {
 	explicit AppState(const CLog& logger);
-
-	const std::map<WORD, std::unique_ptr<IAlgorithm>> m_mapIDAndAlgorithm;
 
 	CAlgManager m_algManager;
 	CAVSystem m_avSystem;
@@ -135,32 +141,14 @@ int WINAPI WinMain(HINSTANCE current_in, HINSTANCE prev_in, LPSTR cmdl, int n_sh
 	return 0;
 }
 
-template<typename Key, typename T, typename... Args>
-auto initFromMoveable(Args&&... args)
-{
-	std::map<Key, std::unique_ptr<T>> map;
-	(map.emplace(std::forward<Args>(args)), ...);
-	return map;
-}
-
 AppState::AppState(const CLog& logger) :
-	m_mapIDAndAlgorithm{ initFromMoveable<WORD, IAlgorithm>(
-		std::pair{ID_METHOD_BUBBLESORT, std::make_unique<CBubbleSortAlgorithm>(logger) },
-		std::pair{ID_METHOD_SHAKERSORT, std::make_unique<CShakerSortAlgorithm>(logger) },
-		std::pair{ID_METHOD_SELECTIONSORT, std::make_unique<CSelectionSortAlgorithm>(logger) },
-		std::pair{ID_METHOD_INSERTIONSORT, std::make_unique<CInsertionSortAlgorithm>(logger) },
-		std::pair{ID_METHOD_SHELLSORT, std::make_unique<CShellSortAlgorithm>(logger)},
-		std::pair{ID_METHOD_QUICKSORT, std::make_unique<CQuickSortAlgorithm>(logger) },
-		std::pair{ID_METHOD_SHUFFLE, std::make_unique<CShuffleElementsAlgorithm>(logger) }
-)},
-
-m_algManager { logger},
-m_avSystem { logger}
+	m_algManager { logger},
+	m_avSystem { logger}
 {
 	m_algManager.SetTempo(3000.0);
 	m_algManager.SetNumOfElements(100);
 	m_algManager.GenerateData(doSpecialRandomized);
-	m_algManager.SetAlgorithm(m_mapIDAndAlgorithm.at(ID_METHOD_SHUFFLE).get());
+	m_algManager.SetAlgorithm(ID_METHOD_QUICKSORT);
 
 	m_avSystem.SetMaxSize(5.0f, 1.0f, 1.0f);
 
@@ -388,7 +376,7 @@ void RenderScene(AppState& appState) {
 		    glTextPrintf(&g_Font, 10.0f, 34.0f, "Algorithm: %s", appState.m_algManager.GetAlgorithmName().c_str());
 		    glTextPrintf(&g_Font, 10.0f, 48.0f, "Num of Elements: %d", appState.m_algManager.GetNumOfElements());
 			glTextPrintf(&g_Font, 10.0f, 62.0f, "Elements order: %s", appState.m_algManager.GetDataOrderName());
-			auto stats = appState.m_algManager.GetCurrentStats();
+			const auto stats = appState.m_algManager.GetCurrentStats();
 		    glTextPrintf(&g_Font, 10.0f, 76.0f, "Comparisons: %d", stats.GetNumOfComparisions());
 		    glTextPrintf(&g_Font, 10.0f, 90.0f, "Exchanges: %d", stats.GetNumOfExchanges());
 			glTextPrintf(&g_Font, 10.0f, 104.0f, "Iterations: %d", stats.GetNumOfIterations());
@@ -509,7 +497,7 @@ bool OnMenuCommand(WORD iId, HMENU hMenu, std::any& param) {
 		case ID_METHOD_SHELLSORT: 
 		case ID_METHOD_QUICKSORT: 
 		case ID_METHOD_SHUFFLE: {
-			pAppState->m_algManager.SetAlgorithm(pAppState->m_mapIDAndAlgorithm.at(iId).get());
+			pAppState->m_algManager.SetAlgorithm(iId);
 			if (g_bRegenerate) pAppState->m_algManager.RegenerateData();
 			pAppState->m_algManager.RunAgain();
 			break;
