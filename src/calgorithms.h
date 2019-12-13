@@ -47,7 +47,6 @@ public:
 
 	virtual void Init(CViData *viData) = 0;
 	virtual void Step() = 0;
-	virtual void Stop() = 0;
 
 	const std::string& GetName() { return m_name; }
 	bool IsDone() { return m_isDone; }
@@ -75,7 +74,7 @@ public:
 
 	void Init(CViData* viData) override;
 	void Step() override;
-	void Stop() override;
+
 private:
 	CViArray<float>* m_viArray{ nullptr };
 	int m_i{ 0 };
@@ -89,7 +88,6 @@ public:
 
 	void Init(CViData *viData) override;
 	void Step() override;
-	void Stop() override;
 
 private:
 	CViArray<float>* m_viArray{ nullptr };
@@ -105,7 +103,6 @@ public:
 
 	void Init(CViData *viData) override;
 	void Step() override;
-	void Stop() override;
 
 private:
 	CViArray<float>* m_viArray{ nullptr };
@@ -121,7 +118,6 @@ public:
 
 	void Init(CViData *viData) override;
 	void Step() override;
-	void Stop() override;
 
 private:
 	CViArray<float>* m_viArray{ nullptr };
@@ -137,7 +133,7 @@ public:
 
 	void Init(CViData *viData) override;
 	void Step() override;
-	void Stop() override;
+
 private:
 	CViArray<float>* m_viArray{ nullptr };
 	int m_i{ 0 };
@@ -153,7 +149,6 @@ public:
 
 	void Init(CViData* viData) override;
 	void Step() override;
-	void Stop() override;
 
 private:
 	CViArray<float>* m_viArray{ nullptr };
@@ -172,7 +167,6 @@ public:
 
 	void Init(CViData* viData) override;
 	void Step() override;
-	void Stop() override;
 
 private:
 	CViArray<float>* m_viArray{ nullptr };

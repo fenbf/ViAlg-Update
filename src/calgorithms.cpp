@@ -75,14 +75,6 @@ void CBubbleSortAlgorithm::Step() {
 	}
 }
 
-// the stop method ------------------------------------------------------------+
-void CBubbleSortAlgorithm::Stop() {
-	m_i = 0;
-	m_j = m_viArray->GetSize()-1;
-	m_viArray->SetSection(-1, -1);
-	m_isDone = false;
-}
-
 /*-----------------------------------------------------------------------------+
 |               Implementation of the CShakerSortAlgorithm class               |
 +-----------------------------------------------------------------------------*/
@@ -133,14 +125,6 @@ void CShakerSortAlgorithm::Step() {
 	m_viArray->SetSection(m_i, m_j);
 }
 
-// the stop method ------------------------------------------------------------+
-void CShakerSortAlgorithm::Stop() {
-	m_i = 0;
-	m_j = m_viArray->GetSize()-1;
-	m_viArray->SetSection(-1, -1);
-	m_isDone = false;
-}
-
 /*-----------------------------------------------------------------------------+
 |               Implementation of the CSelectionSortAlgorithm class               |
 +-----------------------------------------------------------------------------*/
@@ -187,14 +171,6 @@ void CSelectionSortAlgorithm::Step() {
 
 	if (m_i >= m_viArray->GetSize()-1) 
 		m_isDone = false;
-}
-
-// the stop method ------------------------------------------------------------+
-void CSelectionSortAlgorithm::Stop() {
-	m_i = 0;
-	m_j = 1;
-	m_viArray->SetSection(-1, -1);
-	m_isDone = false;
 }
 
 /*-----------------------------------------------------------------------------+
@@ -250,14 +226,6 @@ void CInsertionSortAlgorithm::Step() {
 	m_j = m_i;
 	m_fValue = (*m_viArray)[m_i];
 	m_viArray->SetSection(m_i, m_viArray->GetSize()-1);
-}
-
-// the stop method ------------------------------------------------------------+
-void CInsertionSortAlgorithm::Stop() {
-	m_i = 0;
-	m_j = 1;
-	m_viArray->SetSection(-1, -1);
-	m_isDone = false;
 }
 
 /*-----------------------------------------------------------------------------+
@@ -322,14 +290,6 @@ void CShellSortAlgorithm::Step() {
 	m_viArray->SetSection(m_i, m_viArray->GetSize()-1);
 
 	m_name = "Shell Sort " + std::to_string(m_h) + "-sorting";
-}
-
-// the stop method ------------------------------------------------------------+
-void CShellSortAlgorithm::Stop() {
-	m_i = 0;
-	m_j = 1;
-	m_viArray->SetSection(-1, -1);
-	m_isDone = false;
 }
 
 /*-----------------------------------------------------------------------------+
@@ -459,12 +419,6 @@ void CQuickSortAlgorithm::Step() {
 	}
 }
 
-// the stop method ------------------------------------------------------------+
-void CQuickSortAlgorithm::Stop() {
-	m_viArray->SetSection(-1, -1);
-	m_isDone = false;
-}
-
 /*-----------------------------------------------------------------------------+
 |               Implementation of the CShuffleElementsAlgorithm class               |
 +-----------------------------------------------------------------------------*/
@@ -500,13 +454,6 @@ void CShuffleElementsAlgorithm::Step() {
 	else
 		m_isDone = false;
 }
-
-// the stop method ------------------------------------------------------------+
-void CShuffleElementsAlgorithm::Stop() {
-	m_viArray->SetSection(-1, -1);
-	m_isDone = false;
-}
-
 
 /*-----------------------------------------------------------------------------+
 |                  Implementation of the CAlgManager class                     |
@@ -576,9 +523,6 @@ void CAlgManager::SetAlgorithm(WORD algID) {
 void CAlgManager::SetNumOfElements(int iElems) {
 	if(iElems == m_viArray2.GetSize()) return; 
 	m_logger.AddMsg(LogMode::Info, "%s - new number of data element was set to: %d", typeid(*this).name(), iElems);
-	
-	if (m_pCurrentAlg) 
-		m_pCurrentAlg->Stop();
 	
 	m_viArray2.Resize(iElems); 
 	GenerateData(m_dOrder);
