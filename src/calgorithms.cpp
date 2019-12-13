@@ -45,12 +45,12 @@ void CBubbleSortAlgorithm::Init(CViData *viData) {
 	m_j = m_viArray->GetSize()-1;
 	m_viArray->SetSection(m_i, m_j);
 	m_stats.ZeroStats();
-	m_bRunning = true;
+	m_isDone = true;
 }
 
 // the Step method ------------------------------------------------------------+
 void CBubbleSortAlgorithm::Step() {
-	if (!m_bRunning) return;
+	if (!m_isDone) return;
 
 	// normal code of the bubble sort algorith is:
 	//     for (i = 0; i < m_viArray.GetSize()-1; ++i) {
@@ -67,7 +67,7 @@ void CBubbleSortAlgorithm::Step() {
 	else {
 		++m_i;
 
-		if (m_i >= m_viArray->GetSize()-1) m_bRunning = false;
+		if (m_i >= m_viArray->GetSize()-1) m_isDone = false;
 
 		m_j = m_viArray->GetSize()-1;
 
@@ -80,7 +80,7 @@ void CBubbleSortAlgorithm::Stop() {
 	m_i = 0;
 	m_j = m_viArray->GetSize()-1;
 	m_viArray->SetSection(-1, -1);
-	m_bRunning = false;
+	m_isDone = false;
 }
 
 /*-----------------------------------------------------------------------------+
@@ -96,12 +96,12 @@ void CShakerSortAlgorithm::Init(CViData *vData) {
 	m_j2 = 0;                       // forward
 	m_viArray->SetSection(m_i, m_j);
 	m_stats.ZeroStats();
-	m_bRunning = true;
+	m_isDone = true;
 }
 
 // the Step method ------------------------------------------------------------+
 void CShakerSortAlgorithm::Step() {
-	if (!m_bRunning) return;
+	if (!m_isDone) return;
 
 	// normal code of the bubble sort algorith is:
 	//     for (i = 0; i < m_viArray.GetSize()-1; ++i) {
@@ -125,7 +125,7 @@ void CShakerSortAlgorithm::Step() {
 	++m_i;
 
 	m_viArray->SetAdditionalMark(-1);
-	if (m_i >= m_viArray->GetSize()-1) m_bRunning = false;
+	if (m_i >= m_viArray->GetSize()-1) m_isDone = false;
 
 	m_j = m_viArray->GetSize()-1-m_i;
 	m_j2 = m_i;
@@ -138,7 +138,7 @@ void CShakerSortAlgorithm::Stop() {
 	m_i = 0;
 	m_j = m_viArray->GetSize()-1;
 	m_viArray->SetSection(-1, -1);
-	m_bRunning = false;
+	m_isDone = false;
 }
 
 /*-----------------------------------------------------------------------------+
@@ -154,12 +154,12 @@ void CSelectionSortAlgorithm::Init(CViData *vData) {
 	m_iMin = m_i;
 	m_viArray->SetSection(m_i, m_viArray->GetSize()-1);
 	m_stats.ZeroStats();
-	m_bRunning = true;
+	m_isDone = true;
 }
 
 // the Step method ------------------------------------------------------------+
 void CSelectionSortAlgorithm::Step() {
-	if (!m_bRunning) return;
+	if (!m_isDone) return;
 
 	// normal code of the selection sort algorith is:
 	//     for (i = 0; i < m_viArray.GetSize()-1; ++i) {
@@ -186,7 +186,7 @@ void CSelectionSortAlgorithm::Step() {
 	m_viArray->SetSection(m_i, m_viArray->GetSize()-1);
 
 	if (m_i >= m_viArray->GetSize()-1) 
-		m_bRunning = false;
+		m_isDone = false;
 }
 
 // the stop method ------------------------------------------------------------+
@@ -194,7 +194,7 @@ void CSelectionSortAlgorithm::Stop() {
 	m_i = 0;
 	m_j = 1;
 	m_viArray->SetSection(-1, -1);
-	m_bRunning = false;
+	m_isDone = false;
 }
 
 /*-----------------------------------------------------------------------------+
@@ -210,12 +210,12 @@ void CInsertionSortAlgorithm::Init(CViData *vData) {
 	m_fValue = (*m_viArray)[1];
 	m_viArray->SetSection(m_i, m_viArray->GetSize()-1);
 	m_stats.ZeroStats();
-	m_bRunning = true;
+	m_isDone = true;
 }
 
 // the Step method ------------------------------------------------------------+
 void CInsertionSortAlgorithm::Step() {
-	if (!m_bRunning) return;
+	if (!m_isDone) return;
 
 	// normal code of the insertion sort algorith is:
 	//     for (i = 1; i < m_viArray.GetSize(); ++i) {
@@ -243,7 +243,7 @@ void CInsertionSortAlgorithm::Step() {
 	++m_i;
 
 	if (m_i >= m_viArray->GetSize()) { 
-		m_bRunning = false; 
+		m_isDone = false; 
 		return; 
 	}
 
@@ -257,7 +257,7 @@ void CInsertionSortAlgorithm::Stop() {
 	m_i = 0;
 	m_j = 1;
 	m_viArray->SetSection(-1, -1);
-	m_bRunning = false;
+	m_isDone = false;
 }
 
 /*-----------------------------------------------------------------------------+
@@ -274,12 +274,12 @@ void CShellSortAlgorithm::Init(CViData *vData) {
 	m_fValue = (*m_viArray)[m_i];
 	m_viArray->SetSection(m_i, m_viArray->GetSize()-1);
 	m_stats.ZeroStats();
-	m_bRunning = true;
+	m_isDone = true;
 }
 
 // the Step method ------------------------------------------------------------+
 void CShellSortAlgorithm::Step() {
-	if (!m_bRunning) return;
+	if (!m_isDone) return;
 
 	// normal code of the insertion sort algorith is:
 	//    for (h = 1; h < m_viArray.GetSize()/9; h = 3*h+1); 
@@ -311,7 +311,7 @@ void CShellSortAlgorithm::Step() {
 	if (m_i >= m_viArray->GetSize()) {
 		m_h /= 3;
 		if (m_h < 1) { 
-			m_bRunning = false; 
+			m_isDone = false; 
 			return; 
 		}
 		m_i = m_h;
@@ -329,7 +329,7 @@ void CShellSortAlgorithm::Stop() {
 	m_i = 0;
 	m_j = 1;
 	m_viArray->SetSection(-1, -1);
-	m_bRunning = false;
+	m_isDone = false;
 }
 
 /*-----------------------------------------------------------------------------+
@@ -407,12 +407,12 @@ void CQuickSortAlgorithm::Init(CViData* vData) {
 
 	m_viArray->SetSection(0, m_h);
 	m_stats.ZeroStats();
-	m_bRunning = true;
+	m_isDone = true;
 }
 
 // the Step method ------------------------------------------------------------+
 void CQuickSortAlgorithm::Step() {
-	if (!m_bRunning) return;
+	if (!m_isDone) return;
 
 	m_stats.NextIteration();
 
@@ -444,7 +444,7 @@ void CQuickSortAlgorithm::Step() {
 	}
 
 	if (m_stack.empty())
-		m_bRunning = false;
+		m_isDone = false;
 	else
 	{
 		m_h = m_stack.top();
@@ -462,7 +462,7 @@ void CQuickSortAlgorithm::Step() {
 // the stop method ------------------------------------------------------------+
 void CQuickSortAlgorithm::Stop() {
 	m_viArray->SetSection(-1, -1);
-	m_bRunning = false;
+	m_isDone = false;
 }
 
 /*-----------------------------------------------------------------------------+
@@ -481,12 +481,12 @@ void CShuffleElementsAlgorithm::Init(CViData* vData) {
 
 	m_viArray->SetSection(0, m_viArray->GetSize() - 1);
 	m_stats.ZeroStats();
-	m_bRunning = true;
+	m_isDone = true;
 }
 
 // the Step method ------------------------------------------------------------+
 void CShuffleElementsAlgorithm::Step() {
-	if (!m_bRunning) return;
+	if (!m_isDone) return;
 
 	m_stats.NextIteration();
 
@@ -498,13 +498,13 @@ void CShuffleElementsAlgorithm::Step() {
 		++m_i;
 	}
 	else
-		m_bRunning = false;
+		m_isDone = false;
 }
 
 // the stop method ------------------------------------------------------------+
 void CShuffleElementsAlgorithm::Stop() {
 	m_viArray->SetSection(-1, -1);
-	m_bRunning = false;
+	m_isDone = false;
 }
 
 

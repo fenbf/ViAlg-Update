@@ -42,23 +42,20 @@ private:
 // #refactor: extract AlgStats class
 class IAlgorithm {
 public:
-	explicit IAlgorithm(const std::string& name): m_bRunning(false), m_name(name) { }
+	explicit IAlgorithm(const std::string& name): m_isDone(false), m_name(name) { }
 	virtual ~IAlgorithm() noexcept { }
 
 	virtual void Init(CViData *viData) = 0;
 	virtual void Step() = 0;
 	virtual void Stop() = 0;
 
-	void Pause() { m_bRunning = false; }
-	void Resume() { m_bRunning = true; }
-
 	const std::string& GetName() { return m_name; }
-	bool IsRunning() { return m_bRunning; }
+	bool IsDone() { return m_isDone; }
 
 	const AlgOpsWrapper& GetStats() const noexcept { return m_stats; }
 
 protected:
-	bool m_bRunning;
+	bool m_isDone;
 	std::string m_name;
 	AlgOpsWrapper m_stats;
 };
