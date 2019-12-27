@@ -38,25 +38,27 @@ private:
 	uint32_t m_iIterations{ 0 };
 };
 
-// defines a basic interface for all algorithms
-// #refactor: extract AlgStats class
+// defines a basic interface for all algorithms that operate on arrays
 class IAlgorithm {
 public:
 	explicit IAlgorithm(const std::string& name): m_isDone(false), m_name(name) { }
-	virtual ~IAlgorithm() noexcept { }
+	virtual ~IAlgorithm() noexcept = default;
 
-	virtual void Init(CViData *viData) = 0;
+	virtual void Init(const std::vector<float>& vec) = 0;
 	virtual void Step() = 0;
 
-	const std::string& GetName() { return m_name; }
-	bool IsDone() { return m_isDone; }
+	const std::string& GetName() const noexcept { return m_name; }
+	bool IsDone() const noexcept { return m_isDone; }
 
 	const AlgOpsWrapper& GetStats() const noexcept { return m_stats; }
+
+	const std::vector<float>& GetElements() const noexcept { m_elements; }
 
 protected:
 	bool m_isDone;
 	std::string m_name;
 	AlgOpsWrapper m_stats;
+	std::vector<float> m_elements; // current data we operate on
 };
 
 // class that has a role of creating new algorithm classes, based on the ID we pass
@@ -70,13 +72,12 @@ public:
 // the CBubbleSortAlgorithm class ---------------------------------------------+
 class CBubbleSortAlgorithm : public IAlgorithm {
 public:
-	explicit CBubbleSortAlgorithm() : IAlgorithm("Bubble Sort") { }
+	CBubbleSortAlgorithm() : IAlgorithm("Bubble Sort") { }
 
-	void Init(CViData* viData) override;
+	void Init(const std::vector<float>& vec) override;
 	void Step() override;
 
 private:
-	CViArray<float>* m_viArray{ nullptr };
 	int m_i{ 0 };
 	int m_j{ 0 };    // loop iterators
 };
@@ -84,13 +85,12 @@ private:
 // the CShakerSortAlgorithm class ---------------------------------------------+
 class CShakerSortAlgorithm : public IAlgorithm {
 public:
-	explicit CShakerSortAlgorithm() : IAlgorithm("Shaker Sort") { }
+	CShakerSortAlgorithm() : IAlgorithm("Shaker Sort") { }
 
-	void Init(CViData *viData) override;
+	void Init(const std::vector<float>& vec) override;
 	void Step() override;
 
 private:
-	CViArray<float>* m_viArray{ nullptr };
 	int m_i{ 0 };
 	int m_j{ 0 };
 	int m_j2{ 0 };
@@ -99,13 +99,12 @@ private:
 // the CSelectionSortAlgorithm class ------------------------------------------+
 class CSelectionSortAlgorithm : public IAlgorithm {
 public:
-	explicit CSelectionSortAlgorithm() : IAlgorithm("Selection Sort") { }
+	CSelectionSortAlgorithm() : IAlgorithm("Selection Sort") { }
 
-	void Init(CViData *viData) override;
+	void Init(const std::vector<float>& vec) override;
 	void Step() override;
 
 private:
-	CViArray<float>* m_viArray{ nullptr };
 	int m_i{ 0 };
 	int m_j{ 0 };
 	int m_iMin{ 0 };
@@ -114,13 +113,12 @@ private:
 // the CInsertionSortAlgorithm class ------------------------------------------+
 class CInsertionSortAlgorithm : public IAlgorithm {
 public:
-	explicit CInsertionSortAlgorithm() : IAlgorithm("Insertion Sort") { }
+	CInsertionSortAlgorithm() : IAlgorithm("Insertion Sort") { }
 
-	void Init(CViData *viData) override;
+	void Init(const std::vector<float>& vec) override;
 	void Step() override;
 
 private:
-	CViArray<float>* m_viArray{ nullptr };
 	int m_i{ 0 };
 	int m_j{ 0 };
 	float m_fValue{ 0.0f };
@@ -129,13 +127,12 @@ private:
 // the CShellSortAlgorithm class ------------------------------------------+
 class CShellSortAlgorithm : public IAlgorithm {
 public:
-	explicit CShellSortAlgorithm() : IAlgorithm("Shell Sort") { }
+	CShellSortAlgorithm() : IAlgorithm("Shell Sort") { }
 
-	void Init(CViData *viData) override;
+	void Init(const std::vector<float>& vec) override;
 	void Step() override;
 
 private:
-	CViArray<float>* m_viArray{ nullptr };
 	int m_i{ 0 };
 	int m_j{ 0 };
 	int m_h{ 0 };
@@ -145,13 +142,12 @@ private:
 // the CShellSortAlgorithm class ------------------------------------------+
 class CQuickSortAlgorithm : public IAlgorithm {
 public:
-	explicit CQuickSortAlgorithm() : IAlgorithm("Quick Sort") { }
+	CQuickSortAlgorithm() : IAlgorithm("Quick Sort") { }
 
-	void Init(CViData* viData) override;
+	void Init(const std::vector<float>& vec) override;
 	void Step() override;
 
 private:
-	CViArray<float>* m_viArray{ nullptr };
 	int m_l{ 0 };
 	int m_h{ 0 };
 	std::stack<int> m_stack;
@@ -163,13 +159,12 @@ private:
 // the CShellSortAlgorithm class ------------------------------------------+
 class CShuffleElementsAlgorithm : public IAlgorithm {
 public:
-	explicit CShuffleElementsAlgorithm() : IAlgorithm("Shuffle Elements") { }
+	CShuffleElementsAlgorithm() : IAlgorithm("Shuffle Elements") { }
 
-	void Init(CViData* viData) override;
+	void Init(const std::vector<float>& vec) override;
 	void Step() override;
 
 private:
-	CViArray<float>* m_viArray{ nullptr };
 	int m_i{ 0 };
 	std::vector<int> m_randomOrder;
 };
