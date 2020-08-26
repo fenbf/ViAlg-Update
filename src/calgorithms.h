@@ -76,8 +76,8 @@ public:
 	void Step() override;
 
 private:
-	int m_i{ 0 };
-	int m_j{ 0 };    // loop iterators
+	size_t m_i{ 0 };
+	size_t m_j{ 0 };    // loop iterators
 };
 
 // shaker sort, bubble sort but from two ends, left and right at the same time
@@ -89,9 +89,9 @@ public:
 	void Step() override;
 
 private:
-	int m_i{ 0 };
-	int m_j{ 0 };
-	int m_j2{ 0 };
+	size_t m_i{ 0 };
+	size_t m_j{ 0 };
+	size_t m_j2{ 0 };
 };
 
 // a regular selection sort algorithm
@@ -103,9 +103,9 @@ public:
 	void Step() override;
 
 private:
-	int m_i{ 0 };
-	int m_j{ 0 };
-	int m_iMin{ 0 };
+	size_t m_i{ 0 };
+	size_t m_j{ 0 };
+	size_t m_iMin{ 0 };
 };
 
 // a regular insertion sort algorithm
@@ -117,8 +117,8 @@ public:
 	void Step() override;
 
 private:
-	int m_i{ 0 };
-	int m_j{ 0 };
+	size_t m_i{ 0 };
+	size_t m_j{ 0 };
 	float m_fValue{ 0.0f };
 };
 
@@ -131,9 +131,9 @@ public:
 	void Step() override;
 
 private:
-	int m_i{ 0 };
-	int m_j{ 0 };
-	int m_h{ 0 };
+	size_t m_i{ 0 };
+	size_t m_j{ 0 };
+	size_t m_h{ 0 };
 	float m_fValue{ 0.0f };
 };
 
@@ -146,12 +146,12 @@ public:
 	void Step() override;
 
 private:
-	int m_l{ 0 };
-	int m_h{ 0 };
-	std::stack<int> m_stack;
+	size_t m_l{ 0 };
+	size_t m_h{ 0 };
+	std::stack<size_t> m_stack;
 	float m_valPartition{ 0.0f };
-	int m_indexPartition{ 0 };
-	int m_iter{ 0 };
+	size_t m_indexPartition{ 0 };
+	size_t m_iter{ 0 };
 };
 
 // shuffle, demo code, testing
@@ -163,7 +163,7 @@ public:
 	void Step() override;
 
 private:
-	int m_i{ 0 };
+	size_t m_i{ 0 };
 	std::vector<int> m_randomOrder;
 };
 
@@ -179,7 +179,7 @@ public:
 	void GenerateData(DataOrder dOrder);
 	void RegenerateData();
 	void SetAlgorithm(WORD algID);
-	void SetNumOfElements(int iElems);
+	void SetNumOfElements(size_t iElems);
 
 	void SetTempo(double fTempo) { if (fTempo > 0.0) m_bBeat.SetTempoBPM(fTempo); }
 	double GetTempo() { return m_bBeat.GetTempoBPM(); }

@@ -34,9 +34,9 @@
 
 #include "resource.h"
 
-const double fTempoDelta = 500.0;  // beats per minute (bpm)
-const int iElementsDelta = 10;
-const int iElementsMin = 20;
+constexpr double fTempoDelta = 500.0;  // beats per minute (bpm)
+constexpr size_t iElementsDelta = 10;
+constexpr size_t iElementsMin = 20;
 
 // global variables/objects ---------------------------------------------------+
 // #refactor: extract global state into a single class/wrapper
@@ -375,7 +375,7 @@ void RenderScene(AppState& appState) {
 			else glTextPrintf(&g_Font, 500.0f, 20.0f, "Update tempo: %3.1f", appState.m_algManager.GetTempo()/100.0);
 		    glTextPrintf(&g_Font, 10.0f, 34.0f, "Algorithm: %s", appState.m_algManager.GetAlgorithmName().c_str());
 		    glTextPrintf(&g_Font, 10.0f, 48.0f, "Num of Elements: %d", appState.m_algManager.GetNumOfElements());
-			glTextPrintf(&g_Font, 10.0f, 62.0f, "Elements order: %s", appState.m_algManager.GetDataOrderName());
+			glTextPrintf(&g_Font, 10.0f, 62.0f, "Elements order: %s", appState.m_algManager.GetDataOrderName().c_str());
 			const auto stats = appState.m_algManager.GetCurrentStats();
 		    glTextPrintf(&g_Font, 10.0f, 76.0f, "Comparisons: %d", stats.GetNumOfComparisions());
 		    glTextPrintf(&g_Font, 10.0f, 90.0f, "Exchanges: %d", stats.GetNumOfExchanges());

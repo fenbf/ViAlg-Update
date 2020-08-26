@@ -522,11 +522,11 @@ void CAlgManager::SetAlgorithm(WORD algID) {
 }
 
 // the SetNumOfElements method ------------------------------------------------+
-void CAlgManager::SetNumOfElements(int iElems) {
+void CAlgManager::SetNumOfElements(size_t iElems) {
 	if(iElems == m_viArrayInitial.size()) 
 		return; 
 
-	m_logger.AddMsg(LogMode::Info, "%s - new number of data element was set to: %d", typeid(*this).name(), iElems);
+	m_logger.AddMsg(LogMode::Info, "%s - new number of data element was set to: %ld", typeid(*this).name(), iElems);
 	
 	m_viArrayInitial.resize(iElems); 
 	GenerateData(m_dOrder);

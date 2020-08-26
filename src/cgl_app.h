@@ -11,6 +11,8 @@
 #ifndef CGL_APP_HPP
 	#define CGL_APP_HPP
 
+#define NOMINMAX
+
 #include <windows.h>
 #include <gl\gl.h>
 #include <gl\glu.h>
