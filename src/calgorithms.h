@@ -193,7 +193,7 @@ public:
 	void Pause(bool bPause) { m_bPause = bPause; }
 	void SwapPause() { m_bPause = ( m_bPause == true ? false : true ); }
 	const std::string& GetAlgorithmName() const { return m_pCurrentAlg->GetName(); }
-	int GetNumOfElements() { return m_viArray2.GetSize(); }
+	size_t GetNumOfElements() { return m_viArrayInitial.size(); }
 	std::string GetDataOrderName() { return ToString(m_dOrder); }
 
 	const AlgOpsWrapper& GetCurrentStats() const { return m_pCurrentAlg->GetStats(); }
@@ -203,9 +203,8 @@ private:
 	std::unique_ptr<IAlgorithm> m_pCurrentAlg;
 	bool m_bPause{ false };
 	DataOrder m_dOrder{ DataOrder::doSpecialRandomized };
-	CViArray<float> m_viArray;
-	CViArray<float> m_viArray2;
-	std::vector<float> m_array; // the array that all algorithms operate on
+	CViArray<float> m_viArrayCurrent; // the current array that we operate on
+	std::vector<float> m_viArrayInitial; // initial data, we can then run the algorithm again using the same data...
 
 	const CLog& m_logger;
 };

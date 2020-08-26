@@ -444,7 +444,7 @@ void CShuffleElementsAlgorithm::Step() {
 
 	m_stats.NextIteration();
 
-	if (m_i < m_randomOrder.size())
+	if (m_i < static_cast<int>(m_randomOrder.size()))
 	{
 		// swap:
 		auto a = m_randomOrder[m_i];
@@ -464,7 +464,7 @@ CAlgManager::CAlgManager(const CLog& logger):
     m_bBeat(1.0),
 	m_bPause(false),
 	m_dOrder(DataOrder::doSpecialRandomized),
-	m_viArray(),
+	m_viArrayCurrent(),
 	m_logger(logger)
 {
 	m_logger.AddMsg(LogMode::Info, "%s - initialised", typeid(*this).name());
@@ -486,45 +486,48 @@ void CAlgManager::Update() {
 
 // the Render method ----------------------------------------------------------+
 void CAlgManager::Render(CAVSystem *avSystem) {
-	m_viArray.Render(avSystem);
+	m_viArrayCurrent.Render(avSystem);
 }
 
 // RunAgain method ------------------------------------------------------------+
 void CAlgManager::RunAgain() {
 	if (m_pCurrentAlg) 
-		m_pCurrentAlg->Init(&m_viArray);
+		m_pCurrentAlg->Init(&m_viArrayCurrent);
 }
 
 // the GenerateData method ----------------------------------------------------+
 void CAlgManager::GenerateData(DataOrder dOrder) {
 	m_logger.AddMsg(LogMode::Info, "%s - Data was generated: type - %s", typeid(*this).name(), GetDataOrderName().c_str());
-	m_viArray2.Generate(dOrder);
+	::GenerateData(m_viArrayInitial, dOrder);
 	m_dOrder = dOrder;
 	RegenerateData();
 }
 
 // the Regenerate method ------------------------------------------------------+
 void CAlgManager::RegenerateData() {
-	m_viArray.Resize(m_viArray2.GetSize());
-	for (int i = 0; i < m_viArray2.GetSize(); ++i)
-		m_viArray[i] = m_viArray2[i];
-	m_viArray.SetAdditionalMark(-1);
+	m_viArrayCurrent.Resize(m_viArrayInitial.size());
+	// #refactor use std::copy here somehow...!
+	for (int i = 0; i < m_viArrayInitial.size(); ++i)
+		m_viArrayCurrent[i] = m_viArrayInitial[i];
+	m_viArrayCurrent.SetAdditionalMark(-1);
 }
 
 // the SetAlgorithm method ----------------------------------------------------+
 void CAlgManager::SetAlgorithm(WORD algID) {
-	m_viArray.SetAdditionalMark(-1); 
+	m_viArrayCurrent.SetAdditionalMark(-1); 
 	m_pCurrentAlg = AlgorithmFactory::Create(algID);
-	m_pCurrentAlg->Init(&m_viArray);
+	m_pCurrentAlg->Init(&m_viArrayCurrent);
 	m_logger.AddMsg(LogMode::Info, "%s - %s was assigned the manager", typeid(*this).name(), GetAlgorithmName().c_str());
 }
 
 // the SetNumOfElements method ------------------------------------------------+
 void CAlgManager::SetNumOfElements(int iElems) {
-	if(iElems == m_viArray2.GetSize()) return; 
+	if(iElems == m_viArrayInitial.size()) 
+		return; 
+
 	m_logger.AddMsg(LogMode::Info, "%s - new number of data element was set to: %d", typeid(*this).name(), iElems);
 	
-	m_viArray2.Resize(iElems); 
+	m_viArrayInitial.resize(iElems); 
 	GenerateData(m_dOrder);
 }
 

@@ -18,6 +18,39 @@
 enum class DataOrder { doSorted = 0, doReversed, doRandomized, doSpecialRandomized };
 std::string ToString(DataOrder d);
 
+template<typename T>
+void GenerateData(std::vector<T>& outVec, DataOrder dOrder) {
+	const T tAsp = (T)(1.0 / static_cast<double>(outVec.size()));
+
+	static std::random_device dev;
+	static std::mt19937 rng(dev());
+
+	switch (dOrder) {
+		case DataOrder::doSorted: {
+			for (size_t i = 0; i < outVec.size(); ++i)
+				outVec[i] = (T)(tAsp * (double)(i + 1));
+			break;
+		}
+		case DataOrder::doReversed: {
+			for (size_t i = 0; i < outVec.size(); ++i)
+				outVec[i] = (T)(1.0 - tAsp * (double)(i));
+			break;
+		}
+		case DataOrder::doRandomized: {
+			std::uniform_real_distribution<> dist;
+			for (size_t i = 0; i < outVec.size(); ++i)
+				outVec[i] = (T)(dist(rng));
+			break;
+		}
+		case DataOrder::doSpecialRandomized: {
+			for (size_t i = 0; i < outVec.size(); ++i)
+				outVec[i] = (T)(tAsp * (double)(i + 1));
+			std::shuffle(outVec.begin(), outVec.end(), rng);
+			break;
+		}
+	}
+}
+
 // the CViArray class ---------------------------------------------------------+
 // it beheaves like the std::vector class but it has ability to be drawn by
 // CAVSystem class
@@ -27,11 +60,9 @@ class CViArray {
 public:
 	CViArray(int iSize);
 	CViArray(): m_iLast(-1), m_iLast2(-1), m_iL(-1), m_iR(-1) { }
-	~CViArray();
 
 	void Render(CAVSystem *avSystem);
 
-	void Generate(DataOrder dOrder);
 	void Resize(int iSize) { m_vArray.resize(iSize); m_iLast = -1; m_iLast2 = -1; m_vCurrPos = m_vArray; }
 	void SetSection(int iLeft, int iRight) { m_iL = iLeft; m_iR = iRight; }
 	void SetAdditionalMark(int iId) { m_iLast2 = iId; }
@@ -65,11 +96,6 @@ CViArray<T>::CViArray(int iSize) {
 	m_iL = -1;
 }
 
-// destructor:
-template <class T>
-CViArray<T>::~CViArray() {
-
-}
 
 // Render method --------------------------------------------------------------+
 template <class T>
@@ -86,43 +112,6 @@ void CViArray<T>::Render(CAVSystem *avSystem) {
 		avSystem->DrawDiagramBlock((double)m_vCurrPos[i], ct);
 	}
 	avSystem->EndDrawing();
-}
-
-// Ganerate method ------------------------------------------------------------+
-template <class T>
-void CViArray<T>::Generate(DataOrder dOrder) {
-	T tAsp = (T)(1.0/(double)m_vArray.size());
-
-	static std::random_device dev;
-	static std::mt19937 rng(dev());
-
-	switch ( dOrder ) {
-		case DataOrder::doSorted: {
-			for (size_t i = 0; i < m_vArray.size(); ++i)
-				m_vArray[i] = (T)(tAsp*(double)(i+1));
-			break;
-			}
-	   case DataOrder::doReversed: {
-			for (size_t i = 0; i < m_vArray.size(); ++i)
-				m_vArray[i] = (T)(1.0 - tAsp*(double)(i));
-			break;
-			}
-	   case DataOrder::doRandomized: {
-		   std::uniform_real_distribution<> dist;
-		   for (size_t i = 0; i < m_vArray.size(); ++i)
-			   m_vArray[i] = (T)(dist(rng));
-			break;
-			}
-	   case DataOrder::doSpecialRandomized: {
-			std::uniform_int_distribution<> dist(1, m_vArray.size());
-			for (size_t i = 0; i < m_vArray.size(); ++i)
-				m_vArray[i] = (T)(tAsp * (double)(i + 1));
-			std::shuffle(m_vArray.begin(), m_vArray.end(), rng);
-			break;
-		}
-	}
-	m_iLast2 = -1;
-	m_vCurrPos = m_vArray;
 }
 
 // the [] operator ------------------------------------------------------------+
