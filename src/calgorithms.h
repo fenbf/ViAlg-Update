@@ -48,7 +48,7 @@ public:
 	virtual void Init(CViData *viData) = 0;
 	virtual void Step() = 0;
 
-	const std::string& GetName() { return m_name; }
+	const std::string& GetName() const { return m_name; }
 	bool IsDone() { return m_isDone; }
 
 	const AlgOpsWrapper& GetStats() const noexcept { return m_stats; }
@@ -192,7 +192,7 @@ public:
 	double GetTempo() { return m_bBeat.GetTempoBPM(); }
 	void Pause(bool bPause) { m_bPause = bPause; }
 	void SwapPause() { m_bPause = ( m_bPause == true ? false : true ); }
-	const std::string& GetAlgorithmName() { return m_pCurrentAlg->GetName(); }
+	const std::string& GetAlgorithmName() const { return m_pCurrentAlg->GetName(); }
 	int GetNumOfElements() { return m_viArray2.GetSize(); }
 	std::string GetDataOrderName() { return ToString(m_dOrder); }
 
