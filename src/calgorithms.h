@@ -45,7 +45,7 @@ public:
 	explicit IAlgorithm(const std::string& name): m_isDone(false), m_name(name) { }
 	virtual ~IAlgorithm() noexcept { }
 
-	virtual void Init(CViData *viData) = 0;
+	virtual void Init(CViArray<float> *viData) = 0;
 	virtual void Step() = 0;
 
 	const std::string& GetName() const { return m_name; }
@@ -72,7 +72,7 @@ class CBubbleSortAlgorithm : public IAlgorithm {
 public:
 	explicit CBubbleSortAlgorithm() : IAlgorithm("Bubble Sort") { }
 
-	void Init(CViData* viData) override;
+	void Init(CViArray<float>* viData) override;
 	void Step() override;
 
 private:
@@ -86,7 +86,7 @@ class CShakerSortAlgorithm : public IAlgorithm {
 public:
 	explicit CShakerSortAlgorithm() : IAlgorithm("Shaker Sort") { }
 
-	void Init(CViData *viData) override;
+	void Init(CViArray<float> *viData) override;
 	void Step() override;
 
 private:
@@ -101,7 +101,7 @@ class CSelectionSortAlgorithm : public IAlgorithm {
 public:
 	explicit CSelectionSortAlgorithm() : IAlgorithm("Selection Sort") { }
 
-	void Init(CViData *viData) override;
+	void Init(CViArray<float> *viData) override;
 	void Step() override;
 
 private:
@@ -116,7 +116,7 @@ class CInsertionSortAlgorithm : public IAlgorithm {
 public:
 	explicit CInsertionSortAlgorithm() : IAlgorithm("Insertion Sort") { }
 
-	void Init(CViData *viData) override;
+	void Init(CViArray<float> *viData) override;
 	void Step() override;
 
 private:
@@ -131,7 +131,7 @@ class CShellSortAlgorithm : public IAlgorithm {
 public:
 	explicit CShellSortAlgorithm() : IAlgorithm("Shell Sort") { }
 
-	void Init(CViData *viData) override;
+	void Init(CViArray<float> *viData) override;
 	void Step() override;
 
 private:
@@ -147,7 +147,7 @@ class CQuickSortAlgorithm : public IAlgorithm {
 public:
 	explicit CQuickSortAlgorithm() : IAlgorithm("Quick Sort") { }
 
-	void Init(CViData* viData) override;
+	void Init(CViArray<float> * viData) override;
 	void Step() override;
 
 private:
@@ -165,7 +165,7 @@ class CShuffleElementsAlgorithm : public IAlgorithm {
 public:
 	explicit CShuffleElementsAlgorithm() : IAlgorithm("Shuffle Elements") { }
 
-	void Init(CViData* viData) override;
+	void Init(CViArray<float> * viData) override;
 	void Step() override;
 
 private:

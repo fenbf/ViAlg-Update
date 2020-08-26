@@ -18,21 +18,12 @@
 enum class DataOrder { doSorted = 0, doReversed, doRandomized, doSpecialRandomized };
 std::string ToString(DataOrder d);
 
-// the CViData base abstract class --------------------------------------------+
-class CViData {
-public:
-	CViData() { }
-	virtual ~CViData() { }
-
-	virtual void Render(CAVSystem *avSystem) = 0;
-};
-
 // the CViArray class ---------------------------------------------------------+
 // it beheaves like the std::vector class but it has ability to be drawn by
 // CAVSystem class
 // #refactor: holding the data + rendering, two different responsibilities, keep it simple!
 template <class T>
-class CViArray : public CViData {
+class CViArray {
 public:
 	CViArray(int iSize);
 	CViArray(): m_iLast(-1), m_iLast2(-1), m_iL(-1), m_iR(-1) { }
@@ -104,7 +95,6 @@ void CViArray<T>::Generate(DataOrder dOrder) {
 
 	static std::random_device dev;
 	static std::mt19937 rng(dev());
-
 
 	switch ( dOrder ) {
 		case DataOrder::doSorted: {

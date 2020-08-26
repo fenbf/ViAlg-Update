@@ -38,8 +38,8 @@ std::unique_ptr<IAlgorithm> AlgorithmFactory::Create(WORD algID)
 +-----------------------------------------------------------------------------*/
 
 // the Init method ------------------------------------------------------------+
-void CBubbleSortAlgorithm::Init(CViData *viData) {
-	m_viArray = dynamic_cast < CViArray<float> *>(viData);
+void CBubbleSortAlgorithm::Init(CViArray<float> *viData) {
+	m_viArray = viData;
 	
 	m_i = 0;
 	m_j = m_viArray->GetSize()-1;
@@ -80,8 +80,8 @@ void CBubbleSortAlgorithm::Step() {
 +-----------------------------------------------------------------------------*/
 
 // the Init method ------------------------------------------------------------+
-void CShakerSortAlgorithm::Init(CViData *vData) {
-	m_viArray = dynamic_cast < CViArray<float> *>(vData);
+void CShakerSortAlgorithm::Init(CViArray<float> *vData) {
+	m_viArray = vData;
 	
 	m_i = 0;
 	m_j = m_viArray->GetSize()-1;    // backward
@@ -130,8 +130,8 @@ void CShakerSortAlgorithm::Step() {
 +-----------------------------------------------------------------------------*/
 
 // the Init method ------------------------------------------------------------+
-void CSelectionSortAlgorithm::Init(CViData *vData) {
-	m_viArray = dynamic_cast < CViArray<float> *>(vData);
+void CSelectionSortAlgorithm::Init(CViArray<float> *vData) {
+	m_viArray = vData;
 	
 	m_i = 0;
 	m_j = 1;
@@ -178,8 +178,8 @@ void CSelectionSortAlgorithm::Step() {
 +-----------------------------------------------------------------------------*/
 
 // the Init method ------------------------------------------------------------+
-void CInsertionSortAlgorithm::Init(CViData *vData) {
-	m_viArray = dynamic_cast < CViArray<float> *>(vData);
+void CInsertionSortAlgorithm::Init(CViArray<float> *vData) {
+	m_viArray = vData;
 	
 	m_i = 1;
 	m_j = 1;
@@ -233,8 +233,8 @@ void CInsertionSortAlgorithm::Step() {
 +-----------------------------------------------------------------------------*/
 
 // the Init method ------------------------------------------------------------+
-void CShellSortAlgorithm::Init(CViData *vData) {
-	m_viArray = dynamic_cast < CViArray<float> *>(vData);
+void CShellSortAlgorithm::Init(CViArray<float> *vData) {
+	m_viArray = vData;
 	
 	for (m_h = 1; m_h < m_viArray->GetSize()/9; m_h = 3*m_h+1);
 	m_i = m_h;
@@ -355,8 +355,8 @@ void CShellSortAlgorithm::Step() {
 //}
 
 // the Init method ------------------------------------------------------------+
-void CQuickSortAlgorithm::Init(CViData* vData) {
-	m_viArray = dynamic_cast <CViArray<float>*>(vData);
+void CQuickSortAlgorithm::Init(CViArray<float>* vData) {
+	m_viArray = vData;
 
 	m_l = 0;
 	m_h = m_viArray->GetSize() - 1;
@@ -424,8 +424,8 @@ void CQuickSortAlgorithm::Step() {
 +-----------------------------------------------------------------------------*/
 
 // the Init method ------------------------------------------------------------+
-void CShuffleElementsAlgorithm::Init(CViData* vData) {
-	m_viArray = dynamic_cast <CViArray<float>*>(vData);
+void CShuffleElementsAlgorithm::Init(CViArray<float>* vData) {
+	m_viArray = vData;
 
 	m_i = 0;
 	auto rng = std::default_random_engine{};
