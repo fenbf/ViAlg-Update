@@ -515,7 +515,7 @@ void CAlgManager::RegenerateData() {
 void CAlgManager::SetAlgorithm(WORD algID) {
 	m_viArray.SetAdditionalMark(-1); 
 	m_pCurrentAlg = AlgorithmFactory::Create(algID);
-	m_pCurrentAlg->Init(m_viArray.GetData());
+	m_pCurrentAlg->Init(&m_viArray);
 	m_logger.AddMsg(LogMode::Info, "%s - %s was assigned the manager", typeid(*this).name(), GetAlgorithmName());
 }
 

@@ -49,8 +49,6 @@ public:
 	const T& operator [] (int iId) const;
 	T& operator [] (int iId);
 
-	const std::vector<T>& GetData() const noexcept { return m_vArray; }
-
 private:
 	std::vector<T> m_vArray;
 	std::vector<T> m_vCurrPos;
