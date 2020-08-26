@@ -59,24 +59,38 @@ template <class T>
 class CViArray {
 public:
 	CViArray(int iSize);
-	CViArray(): m_iLast(-1), m_iLast2(-1), m_iL(-1), m_iR(-1) { }
+	CViArray() : m_iLast(-1), m_iLast2(-1), m_iL(-1), m_iR(-1) { }
 
-	void Render(CAVSystem *avSystem);
-
-	void Resize(int iSize) { m_vArray.resize(iSize); m_iLast = -1; m_iLast2 = -1; m_vCurrPos = m_vArray; }
+	void Resize(int iSize) { m_vArray.resize(iSize); m_iLast = -1; m_iLast2 = -1; }
 	void SetSection(int iLeft, int iRight) { m_iL = iLeft; m_iR = iRight; }
 	void SetAdditionalMark(int iId) { m_iLast2 = iId; }
-	int GetSize() { return (int)m_vArray.size(); }
+	int GetSize() const { return (int)m_vArray.size(); }
 
-	const T& operator [] (int iId) const;
-	T& operator [] (int iId);
+	int GetLastPos() const { return m_iLast; }
+	int GetLastPosAdditional() const { return m_iLast2; }
+	int GetRangeLeft() const { return m_iL; }
+	int GetRangeRight() const { return m_iR; }
+
+	const T& operator [] (size_t iId) const;
+	T& operator [] (size_t iId);
 
 private:
 	std::vector<T> m_vArray;
-	std::vector<T> m_vCurrPos;
 	int m_iLast;			// last accessed element
 	int m_iLast2;			// additional accesed element
 	int m_iL, m_iR;         // highlighted section - left and right
+
+
+};
+
+class DataRenderer {
+public:
+	void Reset();
+
+	void Render(const CViArray<float>& numbers,  CAVSystem* avSystem);
+
+private:
+	std::vector<float> m_vCurrPos;
 
 	static constexpr float s_AnimBlendFactor = 0.1f;
 };
@@ -89,43 +103,24 @@ private:
 template <class T>
 CViArray<T>::CViArray(int iSize) {
 	m_vArray.resize(iSize);
-	m_vCurrPos = m_vArray;
 	m_iLast = -1;
 	m_iLast2 = -1;
 	m_iR = -1;
 	m_iL = -1;
 }
 
-
-// Render method --------------------------------------------------------------+
-template <class T>
-void CViArray<T>::Render(CAVSystem *avSystem) {
-	ColorType ct;
-	avSystem->BeginDrawing(1.0, (int)m_vArray.size());
-	for (int i = 0; i < (int)m_vArray.size(); ++i) {
-        ct = ctNormal;
-
-		m_vCurrPos[i] += (m_vArray[i] - m_vCurrPos[i]) * s_AnimBlendFactor;
-
-		if (i >= m_iL && i <= m_iR) ct = ctHighlighted;
-		if (i == m_iLast || i == m_iLast2) ct = ctMarked;
-		avSystem->DrawDiagramBlock((double)m_vCurrPos[i], ct);
-	}
-	avSystem->EndDrawing();
-}
-
 // the [] operator ------------------------------------------------------------+
 template <class T>
-const T& CViArray<T>::operator [] (int iId) const {
+const T& CViArray<T>::operator [] (size_t iId) const {
 	if (iId >= m_vArray.size()) return m_vArray[m_vArray.size()-1];
-	m_iLast = iId;
+	//m_iLast = iId;
 	return m_vArray[iId];
 }
 
 // the [] operator ------------------------------------------------------------+
 template <class T>
-T& CViArray<T>::operator [] (int iId) {
-	if (iId >= (int)m_vArray.size()) return m_vArray[m_vArray.size()-1];
+T& CViArray<T>::operator [] (size_t iId) {
+	if (iId >= m_vArray.size()) return m_vArray[m_vArray.size()-1];
 	m_iLast = iId;
 	return m_vArray[iId];
 }

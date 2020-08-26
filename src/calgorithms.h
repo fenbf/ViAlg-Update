@@ -205,6 +205,7 @@ private:
 	DataOrder m_dOrder{ DataOrder::doSpecialRandomized };
 	CViArray<float> m_viArrayCurrent; // the current array that we operate on
 	std::vector<float> m_viArrayInitial; // initial data, we can then run the algorithm again using the same data...
+	DataRenderer m_dataRenderer;
 
 	const CLog& m_logger;
 };

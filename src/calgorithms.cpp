@@ -486,7 +486,7 @@ void CAlgManager::Update() {
 
 // the Render method ----------------------------------------------------------+
 void CAlgManager::Render(CAVSystem *avSystem) {
-	m_viArrayCurrent.Render(avSystem);
+	m_dataRenderer.Render(m_viArrayCurrent, avSystem);
 }
 
 // RunAgain method ------------------------------------------------------------+
@@ -507,9 +507,10 @@ void CAlgManager::GenerateData(DataOrder dOrder) {
 void CAlgManager::RegenerateData() {
 	m_viArrayCurrent.Resize(m_viArrayInitial.size());
 	// #refactor use std::copy here somehow...!
-	for (int i = 0; i < m_viArrayInitial.size(); ++i)
+	for (size_t i = 0; i < m_viArrayInitial.size(); ++i)
 		m_viArrayCurrent[i] = m_viArrayInitial[i];
 	m_viArrayCurrent.SetAdditionalMark(-1);
+	m_dataRenderer.Reset();
 }
 
 // the SetAlgorithm method ----------------------------------------------------+
