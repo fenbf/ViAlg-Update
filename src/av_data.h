@@ -3,8 +3,8 @@
 | Date:		 14th March 2006				  							       |
 | Author:	 Fen															   |
 +------------------------------------------------------------------------------+
-| Algorith Visualization Data                                                  |
-| Privides Vi(sual)Data classes that behave like standard Abstract Data Types  |
+| Algorithm Visualization Data                                                  |
+| Provides Vi(sual)Data classes that behave like standard Abstract Data Types  |
 | but also have methods for Rendering them on the screen.                      |
 +-----------------------------------------------------------------------------*/
 
@@ -51,10 +51,8 @@ void GenerateData(std::vector<T>& outVec, DataOrder dOrder) {
 	}
 }
 
-// the CViArray class ---------------------------------------------------------+
-// it beheaves like the std::vector class but it has ability to be drawn by
-// CAVSystem class
-// #refactor: holding the data + rendering, two different responsibilities, keep it simple!
+// it beheaves like std::vector but it can also track extra states like "last post",
+// current active "window", etc... handy for drawing
 template <class T>
 class CViArray {
 public:
@@ -79,18 +77,16 @@ private:
 	int m_iLast;			// last accessed element
 	int m_iLast2;			// additional accesed element
 	int m_iL, m_iR;         // highlighted section - left and right
-
-
 };
 
+// decouples the storage from the rendering
 class DataRenderer {
 public:
 	void Reset();
-
 	void Render(const CViArray<float>& numbers,  CAVSystem* avSystem);
 
 private:
-	std::vector<float> m_vCurrPos;
+	std::vector<float> m_vCurrPos; // values displayed, might be interpolated - creates nice animation
 
 	static constexpr float s_AnimBlendFactor = 0.1f;
 };
@@ -113,7 +109,7 @@ CViArray<T>::CViArray(int iSize) {
 template <class T>
 const T& CViArray<T>::operator [] (size_t iId) const {
 	if (iId >= m_vArray.size()) return m_vArray[m_vArray.size()-1];
-	//m_iLast = iId;
+	//m_iLast = iId; // cannot change it, unless it's mutable... but not needed...
 	return m_vArray[iId];
 }
 

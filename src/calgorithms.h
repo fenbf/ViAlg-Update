@@ -16,7 +16,7 @@
 #include <memory>
 
 
-// class that wraps the operations used by algorithms and calculates stats that can be presented later
+// class that wraps operations used by algorithms and calculates stats that can be presented later
 class AlgOpsWrapper {
 public:
 	template <class T> void Exchange(T& a, T& b) noexcept { T t = a; a = b; b = t; ++m_iExchanges; }
@@ -39,7 +39,6 @@ private:
 };
 
 // defines a basic interface for all algorithms
-// #refactor: extract AlgStats class
 class IAlgorithm {
 public:
 	explicit IAlgorithm(const std::string& name): m_isDone(false), m_name(name) { }
@@ -54,6 +53,7 @@ public:
 	const AlgOpsWrapper& GetStats() const noexcept { return m_stats; }
 
 protected:
+	CViArray<float>* m_viArray{ nullptr }; // for observing only, we work on that data
 	bool m_isDone;
 	std::string m_name;
 	AlgOpsWrapper m_stats;
@@ -67,7 +67,7 @@ public:
 	static std::unique_ptr<IAlgorithm> Create(WORD algID);
 };
 
-// the CBubbleSortAlgorithm class ---------------------------------------------+
+// bubble sort technique
 class CBubbleSortAlgorithm : public IAlgorithm {
 public:
 	explicit CBubbleSortAlgorithm() : IAlgorithm("Bubble Sort") { }
@@ -76,12 +76,11 @@ public:
 	void Step() override;
 
 private:
-	CViArray<float>* m_viArray{ nullptr };
 	int m_i{ 0 };
 	int m_j{ 0 };    // loop iterators
 };
 
-// the CShakerSortAlgorithm class ---------------------------------------------+
+// shaker sort, bubble sort but from two ends, left and right at the same time
 class CShakerSortAlgorithm : public IAlgorithm {
 public:
 	explicit CShakerSortAlgorithm() : IAlgorithm("Shaker Sort") { }
@@ -90,13 +89,12 @@ public:
 	void Step() override;
 
 private:
-	CViArray<float>* m_viArray{ nullptr };
 	int m_i{ 0 };
 	int m_j{ 0 };
 	int m_j2{ 0 };
 };
 
-// the CSelectionSortAlgorithm class ------------------------------------------+
+// a regular selection sort algorithm
 class CSelectionSortAlgorithm : public IAlgorithm {
 public:
 	explicit CSelectionSortAlgorithm() : IAlgorithm("Selection Sort") { }
@@ -105,13 +103,12 @@ public:
 	void Step() override;
 
 private:
-	CViArray<float>* m_viArray{ nullptr };
 	int m_i{ 0 };
 	int m_j{ 0 };
 	int m_iMin{ 0 };
 };
 
-// the CInsertionSortAlgorithm class ------------------------------------------+
+// a regular insertion sort algorithm
 class CInsertionSortAlgorithm : public IAlgorithm {
 public:
 	explicit CInsertionSortAlgorithm() : IAlgorithm("Insertion Sort") { }
@@ -120,13 +117,12 @@ public:
 	void Step() override;
 
 private:
-	CViArray<float>* m_viArray{ nullptr };
 	int m_i{ 0 };
 	int m_j{ 0 };
 	float m_fValue{ 0.0f };
 };
 
-// the CShellSortAlgorithm class ------------------------------------------+
+// shell sort
 class CShellSortAlgorithm : public IAlgorithm {
 public:
 	explicit CShellSortAlgorithm() : IAlgorithm("Shell Sort") { }
@@ -135,14 +131,13 @@ public:
 	void Step() override;
 
 private:
-	CViArray<float>* m_viArray{ nullptr };
 	int m_i{ 0 };
 	int m_j{ 0 };
 	int m_h{ 0 };
 	float m_fValue{ 0.0f };
 };
 
-// the CShellSortAlgorithm class ------------------------------------------+
+// quick sort
 class CQuickSortAlgorithm : public IAlgorithm {
 public:
 	explicit CQuickSortAlgorithm() : IAlgorithm("Quick Sort") { }
@@ -151,7 +146,6 @@ public:
 	void Step() override;
 
 private:
-	CViArray<float>* m_viArray{ nullptr };
 	int m_l{ 0 };
 	int m_h{ 0 };
 	std::stack<int> m_stack;
@@ -160,7 +154,7 @@ private:
 	int m_iter{ 0 };
 };
 
-// the CShellSortAlgorithm class ------------------------------------------+
+// shuffle, demo code, testing
 class CShuffleElementsAlgorithm : public IAlgorithm {
 public:
 	explicit CShuffleElementsAlgorithm() : IAlgorithm("Shuffle Elements") { }
@@ -169,7 +163,6 @@ public:
 	void Step() override;
 
 private:
-	CViArray<float>* m_viArray{ nullptr };
 	int m_i{ 0 };
 	std::vector<int> m_randomOrder;
 };
