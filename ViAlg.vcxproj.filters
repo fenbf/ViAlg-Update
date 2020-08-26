@@ -51,9 +51,6 @@
     <ClCompile Include="src\gl_texture.cpp">
       <Filter>Source Files\Framework</Filter>
     </ClCompile>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Source Files\Framework</Filter>
-    </ClCompile>
     <ClCompile Include="src\tg_math.cpp">
       <Filter>Source Files\Framework</Filter>
     </ClCompile>
@@ -61,6 +58,12 @@
       <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="src\calgorithms.cpp">
+      <Filter>Source Files\Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\av_data.cpp">
       <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
   </ItemGroup>

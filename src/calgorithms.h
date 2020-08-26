@@ -194,7 +194,7 @@ public:
 	void SwapPause() { m_bPause = ( m_bPause == true ? false : true ); }
 	const std::string& GetAlgorithmName() { return m_pCurrentAlg->GetName(); }
 	int GetNumOfElements() { return m_viArray2.GetSize(); }
-	const char* GetDataOrderName() { return strDataOrderNames[(int)m_dOrder]; }
+	std::string GetDataOrderName() { return ToString(m_dOrder); }
 
 	const AlgOpsWrapper& GetCurrentStats() const { return m_pCurrentAlg->GetStats(); }
 
@@ -202,7 +202,7 @@ private:
 	CBeat m_bBeat;
 	std::unique_ptr<IAlgorithm> m_pCurrentAlg;
 	bool m_bPause{ false };
-	DataOrder m_dOrder{ doSpecialRandomized };
+	DataOrder m_dOrder{ DataOrder::doSpecialRandomized };
 	CViArray<float> m_viArray;
 	CViArray<float> m_viArray2;
 	std::vector<float> m_array; // the array that all algorithms operate on

@@ -463,7 +463,7 @@ void CShuffleElementsAlgorithm::Step() {
 CAlgManager::CAlgManager(const CLog& logger):
     m_bBeat(1.0),
 	m_bPause(false),
-	m_dOrder(doSpecialRandomized),
+	m_dOrder(DataOrder::doSpecialRandomized),
 	m_viArray(),
 	m_logger(logger)
 {
@@ -497,7 +497,7 @@ void CAlgManager::RunAgain() {
 
 // the GenerateData method ----------------------------------------------------+
 void CAlgManager::GenerateData(DataOrder dOrder) {
-	m_logger.AddMsg(LogMode::Info, "%s - Data was generated: type - %s", typeid(*this).name(), GetDataOrderName());
+	m_logger.AddMsg(LogMode::Info, "%s - Data was generated: type - %s", typeid(*this).name(), GetDataOrderName().c_str());
 	m_viArray2.Generate(dOrder);
 	m_dOrder = dOrder;
 	RegenerateData();

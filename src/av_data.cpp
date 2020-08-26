@@ -11,43 +11,8 @@
 
 #include "av_data.h"
 
-//using namespace std;
-
-/*-----------------------------------------------------------------------------+
-|                    Implementation of the CViArray class                      |
-+-----------------------------------------------------------------------------*/
-
-// constructor:
-template <class T>
-CViArray<T>::CViArray(int iSize) {
-	m_vArray.resize(iSize);
-	m_iLast = 0;
+std::string ToString(DataOrder d)
+{
+	static const std::string names[] { "Sorted", "Reversed", "Randomized", "Special Randomized" };
+	return names[static_cast<int>(d)];
 }
-
-// destructor:
-template <class T>
-CViArray<T>::~CViArray() {
-
-}
-
-// Render method --------------------------------------------------------------+
-template <class T>
-void CViArray<T>::Render(const CAVSystem *avSystem) const {
-	avSystem->DrawDiagram(m_vArray.begin(), m_vArray.end());
-}
-
-// the [] operator ------------------------------------------------------------+
-template <class T>
-const T& CViArray<T>::operator [] (int iId) const {
-	m_iLast = iId;
-	return m_vArray[iId];
-}
-
-// the [] operator ------------------------------------------------------------+
-template <class T>
-T& CViArray<T>::operator [] (int iId) {
-	m_iLast = iId;
-	return m_vArray[iId];
-}
-
-// end of file ----------------------------------------------------------------+

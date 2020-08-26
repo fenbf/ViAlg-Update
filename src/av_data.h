@@ -15,8 +15,8 @@
 #include <vector>
 #include <random>
 
-enum DataOrder { doSorted = 0, doReversed, doRandomized, doSpecialRandomized };
-const char strDataOrderNames[4][24] = { "Sorted", "Reversed", "Randomized", "Special Randomized" };
+enum class DataOrder { doSorted = 0, doReversed, doRandomized, doSpecialRandomized };
+std::string ToString(DataOrder d);
 
 // the CViData base abstract class --------------------------------------------+
 class CViData {
@@ -107,23 +107,23 @@ void CViArray<T>::Generate(DataOrder dOrder) {
 
 
 	switch ( dOrder ) {
-		case doSorted: {
+		case DataOrder::doSorted: {
 			for (size_t i = 0; i < m_vArray.size(); ++i)
 				m_vArray[i] = (T)(tAsp*(double)(i+1));
 			break;
 			}
-	   case doReversed: {
+	   case DataOrder::doReversed: {
 			for (size_t i = 0; i < m_vArray.size(); ++i)
 				m_vArray[i] = (T)(1.0 - tAsp*(double)(i));
 			break;
 			}
-	   case doRandomized: {
+	   case DataOrder::doRandomized: {
 		   std::uniform_real_distribution<> dist;
 		   for (size_t i = 0; i < m_vArray.size(); ++i)
 			   m_vArray[i] = (T)(dist(rng));
 			break;
 			}
-	   case doSpecialRandomized: {
+	   case DataOrder::doSpecialRandomized: {
 			std::uniform_int_distribution<> dist(1, m_vArray.size());
 			for (size_t i = 0; i < m_vArray.size(); ++i)
 				m_vArray[i] = (T)(tAsp * (double)(i + 1));

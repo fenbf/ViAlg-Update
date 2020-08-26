@@ -147,7 +147,7 @@ AppState::AppState(const CLog& logger) :
 {
 	m_algManager.SetTempo(3000.0);
 	m_algManager.SetNumOfElements(100);
-	m_algManager.GenerateData(doSpecialRandomized);
+	m_algManager.GenerateData(DataOrder::doSpecialRandomized);
 	m_algManager.SetAlgorithm(ID_METHOD_QUICKSORT);
 
 	m_avSystem.SetMaxSize(5.0f, 1.0f, 1.0f);
@@ -503,22 +503,22 @@ bool OnMenuCommand(WORD iId, HMENU hMenu, std::any& param) {
 			break;
 		}
 		case ID_DATAORDER_SORTED: { 
-			pAppState->m_algManager.GenerateData(doSorted);
+			pAppState->m_algManager.GenerateData(DataOrder::doSorted);
 			pAppState->m_algManager.RunAgain();
 			break; 
 		}
 		case ID_DATAORDER_REVERSED: { 
-			pAppState->m_algManager.GenerateData(doReversed);
+			pAppState->m_algManager.GenerateData(DataOrder::doReversed);
 			pAppState->m_algManager.RunAgain();
 			break; 
 		}
 	    case ID_DATAORDER_RANDOMIZED: { 
-			pAppState->m_algManager.GenerateData(doRandomized);
+			pAppState->m_algManager.GenerateData(DataOrder::doRandomized);
 			pAppState->m_algManager.RunAgain();
 			break; 
 		}
 	    case ID_DATAORDER_SPECIALRANDOMIZED: { 
-			pAppState->m_algManager.GenerateData(doSpecialRandomized);
+			pAppState->m_algManager.GenerateData(DataOrder::doSpecialRandomized);
 			pAppState->m_algManager.RunAgain();
 			break; 
 		}
