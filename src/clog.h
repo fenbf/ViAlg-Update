@@ -11,31 +11,25 @@
 #ifndef CLOG_HPP
 #define CLOG_HPP
 
-#include <string>
+#include "ilogger.h"
 
-enum class LogMode { Info = 0, Err, Success };
 
 /*-----------------------------------------------------------------------------+
 |                                The CLog class                                |
 +-----------------------------------------------------------------------------*/
-class CLog {
+class CLog : public ILogger {
 public:
-	CLog() { }
+	CLog() = default;
 	explicit CLog(std::string filename) noexcept;
 
 	// methods:
-	bool Init(std::string filename) noexcept;
-	void AddMsg(LogMode lmMode, const char* szMsg, ...) const noexcept;
-	
-	inline void Enable() noexcept{ m_bEnabled = true; }
-	inline void Disable() noexcept { m_bEnabled = false; }
-	inline bool IsEnabled() const noexcept { return m_bEnabled; }
+	bool Init(std::string filename) noexcept override;
+	void AddMsg(LogMode lmMode, const char* szMsg, ...) const noexcept override;
 
 private:
 	const char *GetLogClassName(LogMode lmMode) const noexcept;
 
 	std::string m_filename;
-	bool m_bEnabled;
 };
 
 #endif // CLOG_HPP

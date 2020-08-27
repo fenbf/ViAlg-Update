@@ -48,7 +48,7 @@ void CAVSystem::SetDiagramBlockInfo(BlockType bType, const VECTOR3D &vCol, const
 	m_vColHighlighted = vColHighlighted;
 }
 
-void CAVSystem::SetOutlook(const VECTOR3D &vFrameCol, GLuint iFrameTex) {
+void CAVSystem::SetOutlook(const VECTOR3D &vFrameCol, unsigned int iFrameTex) {
 	m_vFrameCol = vFrameCol;
 	m_iTex = iFrameTex;
 }

@@ -10,11 +10,11 @@
 	#define CALGORITHMS_H
 
 #include "av_data.h"
-#include "ctimer.h"
-#include "clog.h"
+#include "ilogger.h"
+#include "beat.h"
 #include <stack>
 #include <memory>
-
+#include "irendersystem.h"
 
 // class that wraps operations used by algorithms and calculates stats that can be presented later
 class AlgOpsWrapper {
@@ -64,7 +64,7 @@ protected:
 class AlgorithmFactory
 {
 public:
-	static std::unique_ptr<IAlgorithm> Create(WORD algID);
+	static std::unique_ptr<IAlgorithm> Create(uint16_t algID);
 };
 
 // bubble sort technique
@@ -170,15 +170,15 @@ private:
 // binds and manages the currently selected algorithm with the array that we work with
 class CAlgManager {
 public:
-	explicit CAlgManager(const CLog& logger);
+	explicit CAlgManager(const ILogger& logger);
 	~CAlgManager();
 
-	void Update();
-	void Render(CAVSystem *avSystem);
+	void Update(double fTime);
+	void Render(IRenderSystem* avSystem);
 	void RunAgain();
 	void GenerateData(DataOrder dOrder);
 	void RegenerateData();
-	void SetAlgorithm(WORD algID);
+	void SetAlgorithm(uint16_t algID);
 	void SetNumOfElements(size_t iElems);
 
 	void SetTempo(double fTempo) { if (fTempo > 0.0) m_bBeat.SetTempoBPM(fTempo); }
@@ -200,7 +200,7 @@ private:
 	std::vector<float> m_viArrayInitial; // initial data, we can then run the algorithm again using the same data...
 	DataRenderer m_dataRenderer;
 
-	const CLog& m_logger;
+	const ILogger& m_logger;
 };
 
 #endif // CALGORITHMS_H

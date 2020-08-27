@@ -206,6 +206,7 @@
   <ItemGroup>
     <ClInclude Include="src\av_data.h" />
     <ClInclude Include="src\av_system.h" />
+    <ClInclude Include="src\beat.h" />
     <ClInclude Include="src\calgorithms.h" />
     <ClInclude Include="src\cgl_app.h" />
     <ClInclude Include="src\clog.h" />
@@ -215,6 +216,8 @@
     <ClInclude Include="src\gl_shapes.h" />
     <ClInclude Include="src\gl_text.h" />
     <ClInclude Include="src\gl_texture.h" />
+    <ClInclude Include="src\ilogger.h" />
+    <ClInclude Include="src\irendersystem.h" />
     <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\tg_math.h" />
   </ItemGroup>

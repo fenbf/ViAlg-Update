@@ -419,7 +419,7 @@ void UpdateAnimation(AppState& appState) {
 
 	if (g_Timer.IsFreezed()) return;
 
-	appState.m_algManager.Update();
+	appState.m_algManager.Update(g_Timer.GetTime());
 }
 
 /*-----------------------------------------------------------------------------+

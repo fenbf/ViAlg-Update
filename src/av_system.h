@@ -20,25 +20,24 @@
 #include "clog.h"
 #include "tg_math.h"
 #include "gl_shapes.h"
+#include "irendersystem.h"
 
 // the CAVSystem class --------------------------------------------------------+
-enum BlockType { btPoint, btBox, btPyramid, btCylinder };
-enum ColorType { ctNormal, ctMarked, ctHighlighted };
 
 // this class provides a basic functionality of drawing chart shapes
-class CAVSystem {
+class CAVSystem : public IRenderSystem {
 public:
 	CAVSystem(const CLog& logger);
 	~CAVSystem();
 
 	void SetDiagramBlockInfo(BlockType bType, const VECTOR3D &vCol, const VECTOR3D &vColMarked, 
-		                     const VECTOR3D &vColHighlighted);
-	void BeginDrawing(double fMaxData, int nCount);
-	void DrawDiagramBlock(double fValue, ColorType cType);
-	void EndDrawing();
-	void SetMaxSize(float fWidth, float fHeight, float fDepth) { m_vMaxSize = VECTOR3D(fWidth, fHeight, fDepth); }
-	void SetOutlook(const VECTOR3D &vFrameCol, GLuint iFrameTex);
-	void SetBlockType(BlockType bType) { m_bType = bType; }
+		                     const VECTOR3D &vColHighlighted) override;
+	void BeginDrawing(double fMaxData, int nCount) override;
+	void DrawDiagramBlock(double fValue, ColorType cType) override;
+	void EndDrawing() override;
+	void SetMaxSize(float fWidth, float fHeight, float fDepth) override { m_vMaxSize = VECTOR3D(fWidth, fHeight, fDepth); }
+	void SetOutlook(const VECTOR3D &vFrameCol, unsigned int iFrameTex) override;
+	void SetBlockType(BlockType bType) override { m_bType = bType; }
 
 	// #refactor: some variables have getters/setters some not...
 	bool m_bHoriz;

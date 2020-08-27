@@ -10,7 +10,7 @@
 +-----------------------------------------------------------------------------*/
 
 #include "av_data.h"
-#include "av_system.h"
+#include "irendersystem.h"
 
 std::string ToString(DataOrder d)
 {
@@ -23,7 +23,7 @@ void DataRenderer::Reset()
 	m_vCurrPos.clear();
 }
 
-void DataRenderer::Render(const CViArray<float>& numbers, CAVSystem* avSystem)
+void DataRenderer::Render(const CViArray<float>& numbers, IRenderSystem* avSystem)
 {
 	// reload data?
 	if (numbers.GetSize() != m_vCurrPos.size())

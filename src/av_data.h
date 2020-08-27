@@ -15,7 +15,7 @@
 #include <random>
 #include <limits>
 
-class CAVSystem;
+class IRenderSystem;
 
 enum class DataOrder { doSorted = 0, doReversed, doRandomized, doSpecialRandomized };
 std::string ToString(DataOrder d);
@@ -86,7 +86,7 @@ private:
 class DataRenderer {
 public:
 	void Reset();
-	void Render(const CViArray<float>& numbers,  CAVSystem* avSystem);
+	void Render(const CViArray<float>& numbers,  IRenderSystem* avSystem);
 
 private:
 	std::vector<float> m_vCurrPos; // values displayed, might be interpolated - creates nice animation

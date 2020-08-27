@@ -17,7 +17,7 @@
 |               Implementation of the AlgorithmFactory class               |
 +-----------------------------------------------------------------------------*/
 
-std::unique_ptr<IAlgorithm> AlgorithmFactory::Create(WORD algID)
+std::unique_ptr<IAlgorithm> AlgorithmFactory::Create(uint16_t algID)
 {
 	switch (algID)
 	{
@@ -460,7 +460,7 @@ void CShuffleElementsAlgorithm::Step() {
 +-----------------------------------------------------------------------------*/
 
 // constructor:
-CAlgManager::CAlgManager(const CLog& logger):
+CAlgManager::CAlgManager(const ILogger& logger):
     m_bBeat(1.0),
 	m_bPause(false),
 	m_dOrder(DataOrder::doSpecialRandomized),
@@ -476,16 +476,17 @@ CAlgManager::~CAlgManager() {
 }
 
 // the Update method ----------------------------------------------------------+
-void CAlgManager::Update() {
-	if (m_bPause == true) return;
+void CAlgManager::Update(double fTime) {
+	if (m_bPause == true) 
+		return;
 	
-	if (m_pCurrentAlg && m_bBeat.Check(g_Timer.GetTime())) {
+	if (m_pCurrentAlg && m_bBeat.Check(fTime)) {
 		m_pCurrentAlg->Step();
 	}
 }
 
 // the Render method ----------------------------------------------------------+
-void CAlgManager::Render(CAVSystem *avSystem) {
+void CAlgManager::Render(IRenderSystem *avSystem) {
 	m_dataRenderer.Render(m_viArrayCurrent, avSystem);
 }
 
@@ -514,7 +515,7 @@ void CAlgManager::RegenerateData() {
 }
 
 // the SetAlgorithm method ----------------------------------------------------+
-void CAlgManager::SetAlgorithm(WORD algID) {
+void CAlgManager::SetAlgorithm(uint16_t algID) {
 	m_viArrayCurrent.SetAdditionalMark(-1); 
 	m_pCurrentAlg = AlgorithmFactory::Create(algID);
 	m_pCurrentAlg->Init(&m_viArrayCurrent);
