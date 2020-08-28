@@ -391,7 +391,7 @@ void CQuickSortAlgorithm::Step() {
 	m_indexPartition++;
 	m_stats.Exchange((*m_viArray)[m_indexPartition], (*m_viArray)[m_h]);
 
-	if (m_indexPartition - 1 > m_l)
+	if (m_indexPartition > 0 && m_indexPartition - 1 > m_l)
 	{
 		m_stack.push(m_l);
 		m_stack.push(m_indexPartition - 1);
