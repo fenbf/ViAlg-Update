@@ -19,8 +19,8 @@ TEST(GenerateData, SortedOrder) {
 }
 
 TEST(Algorithms, BasicCreation) {
-	auto pAlg = AlgorithmFactory::Create(ID_METHOD_BUBBLESORT);
-	EXPECT_NE(pAlg, nullptr);
+	auto alg = AlgorithmFactory::Create(ID_METHOD_BUBBLESORT);
+	EXPECT_EQ(0, alg.index());
 }
 
 class TestRenderer : public IRenderSystem {

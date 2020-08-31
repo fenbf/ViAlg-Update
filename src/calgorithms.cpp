@@ -17,17 +17,17 @@
 |               Implementation of the AlgorithmFactory class               |
 +-----------------------------------------------------------------------------*/
 
-std::unique_ptr<IAlgorithm> AlgorithmFactory::Create(uint16_t algID)
+AlgorithmsVariant AlgorithmFactory::Create(uint16_t algID)
 {
 	switch (algID)
 	{
-	case ID_METHOD_BUBBLESORT: return std::make_unique<CBubbleSortAlgorithm>();
-	case ID_METHOD_SHAKERSORT: return std::make_unique<CShakerSortAlgorithm>();
-	case ID_METHOD_SELECTIONSORT: return std::make_unique<CSelectionSortAlgorithm>();
-	case ID_METHOD_INSERTIONSORT: return std::make_unique<CInsertionSortAlgorithm>();
-	case ID_METHOD_SHELLSORT: return std::make_unique<CShellSortAlgorithm>();
-	case ID_METHOD_QUICKSORT: return std::make_unique<CQuickSortAlgorithm>();
-	case ID_METHOD_SHUFFLE: return std::make_unique<CShuffleElementsAlgorithm>();
+	case ID_METHOD_BUBBLESORT: return CBubbleSortAlgorithm();
+	case ID_METHOD_SHAKERSORT: return CShakerSortAlgorithm{};
+	case ID_METHOD_SELECTIONSORT: return CSelectionSortAlgorithm{};
+	case ID_METHOD_INSERTIONSORT: return CInsertionSortAlgorithm{};
+	case ID_METHOD_SHELLSORT: return CShellSortAlgorithm{};
+	case ID_METHOD_QUICKSORT: return CQuickSortAlgorithm{};
+	case ID_METHOD_SHUFFLE: return CShuffleElementsAlgorithm{};
 	};
 
 	throw std::exception("unrecognized algorithm class ID!");
@@ -480,8 +480,8 @@ void CAlgManager::Update(double fTime) {
 	if (m_bPause == true) 
 		return;
 	
-	if (m_pCurrentAlg && m_bBeat.Check(fTime)) {
-		m_pCurrentAlg->Step();
+	if (m_bBeat.Check(fTime)) {
+		std::visit(IAlgorithm::StepFn{}, m_CurrentAlg);
 	}
 }
 
@@ -492,8 +492,7 @@ void CAlgManager::Render(IRenderSystem *avSystem) {
 
 // RunAgain method ------------------------------------------------------------+
 void CAlgManager::RunAgain() {
-	if (m_pCurrentAlg) 
-		m_pCurrentAlg->Init(&m_viArrayCurrent);
+	std::visit(IAlgorithm::InitFn{ &m_viArrayCurrent }, m_CurrentAlg);
 }
 
 // the GenerateData method ----------------------------------------------------+
@@ -517,8 +516,8 @@ void CAlgManager::RegenerateData() {
 // the SetAlgorithm method ----------------------------------------------------+
 void CAlgManager::SetAlgorithm(uint16_t algID) {
 	m_viArrayCurrent.SetAdditionalMark(-1); 
-	m_pCurrentAlg = AlgorithmFactory::Create(algID);
-	m_pCurrentAlg->Init(&m_viArrayCurrent);
+	m_CurrentAlg = AlgorithmFactory::Create(algID);
+	std::visit(IAlgorithm::InitFn{ &m_viArrayCurrent }, m_CurrentAlg);
 	m_logger.AddMsg(LogMode::Info, "%s - %s was assigned the manager", typeid(*this).name(), GetAlgorithmName().c_str());
 }
 
@@ -531,6 +530,16 @@ void CAlgManager::SetNumOfElements(size_t iElems) {
 	
 	m_viArrayInitial.resize(iElems); 
 	GenerateData(m_dOrder);
+}
+
+const std::string& CAlgManager::GetAlgorithmName() const
+{
+	return std::visit(IAlgorithm::GetNameFn{}, m_CurrentAlg);
+}
+
+const AlgOpsWrapper& CAlgManager::GetCurrentStats() const
+{
+	return std::visit(IAlgorithm::GetStatsFn{}, m_CurrentAlg);
 }
 
 // end of file ----------------------------------------------------------------+

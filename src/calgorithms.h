@@ -14,6 +14,7 @@
 #include "beat.h"
 #include <stack>
 #include <memory>
+#include <variant>
 #include "irendersystem.h"
 
 // class that wraps operations used by algorithms and calculates stats that can be presented later
@@ -41,6 +42,33 @@ private:
 // defines a basic interface for all algorithms
 class IAlgorithm {
 public:
+	struct InitFn {
+		CViArray<float>* viData;
+
+		template<typename T>
+		void operator()(T& alg) { alg.Init(viData); }
+	};
+
+	struct StepFn {
+		template<typename T>
+		void operator()(T& alg) { alg.Step(); }
+	};
+
+	struct GetNameFn {
+		template<typename T>
+		const std::string& operator()(const T& alg) { return alg.GetName(); }
+	};
+
+	struct IsDoneFn {
+		template<typename T>
+		bool operator()(const T& alg) { return alg.IsDone(); }
+	};
+
+	struct GetStatsFn {
+		template<typename T>
+		const AlgOpsWrapper& operator()(const T& alg) { return alg.GetStats(); }
+	};
+public:
 	explicit IAlgorithm(const std::string& name): m_isDone(false), m_name(name) { }
 	virtual ~IAlgorithm() noexcept { }
 
@@ -57,14 +85,6 @@ protected:
 	bool m_isDone;
 	std::string m_name;
 	AlgOpsWrapper m_stats;
-};
-
-// class that has a role of creating new algorithm classes, based on the ID we pass
-// for now we use ID that are UI menu options
-class AlgorithmFactory
-{
-public:
-	static std::unique_ptr<IAlgorithm> Create(uint16_t algID);
 };
 
 // bubble sort technique
@@ -167,6 +187,24 @@ private:
 	std::vector<int> m_randomOrder;
 };
 
+using AlgorithmsVariant = std::variant<
+	CBubbleSortAlgorithm,
+	CShakerSortAlgorithm,
+	CSelectionSortAlgorithm,
+	CInsertionSortAlgorithm,
+	CShellSortAlgorithm,
+	CQuickSortAlgorithm,
+	CShuffleElementsAlgorithm
+>;
+
+// class that has a role of creating new algorithm classes, based on the ID we pass
+// for now we use ID that are UI menu options
+class AlgorithmFactory
+{
+public:
+	static AlgorithmsVariant Create(uint16_t algID);
+};
+
 // binds and manages the currently selected algorithm with the array that we work with
 class CAlgManager {
 public:
@@ -185,15 +223,15 @@ public:
 	double GetTempo() { return m_bBeat.GetTempoBPM(); }
 	void Pause(bool bPause) { m_bPause = bPause; }
 	void SwapPause() { m_bPause = ( m_bPause == true ? false : true ); }
-	const std::string& GetAlgorithmName() const { return m_pCurrentAlg->GetName(); }
+	const std::string& GetAlgorithmName() const;
 	size_t GetNumOfElements() { return m_viArrayInitial.size(); }
 	std::string GetDataOrderName() { return ToString(m_dOrder); }
 
-	const AlgOpsWrapper& GetCurrentStats() const { return m_pCurrentAlg->GetStats(); }
+	const AlgOpsWrapper& GetCurrentStats() const;
 
 private:
 	CBeat m_bBeat;
-	std::unique_ptr<IAlgorithm> m_pCurrentAlg;
+	AlgorithmsVariant m_CurrentAlg;
 	bool m_bPause{ false };
 	DataOrder m_dOrder{ DataOrder::doSpecialRandomized };
 	CViArray<float> m_viArrayCurrent; // the current array that we operate on
