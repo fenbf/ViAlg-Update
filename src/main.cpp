@@ -175,6 +175,14 @@ void InitApp(const CLog& logger, AppState& appState) {
 	CGLApp::m_bFullscreen = false;
 	sprintf_s(CGLApp::m_szTitle, "ViAlg");
 	
+	logger.AddMsg(LogMode::Info, "sizeof(string): %d", sizeof(std::string));
+	logger.AddMsg(LogMode::Info, "sizeof(IAlgorithm): %d", sizeof(IAlgorithm));
+	logger.AddMsg(LogMode::Info, "sizeof(CBubbleSortAlgorithm): %d", sizeof(CBubbleSortAlgorithm));
+	logger.AddMsg(LogMode::Info, "sizeof(CInsertionSortAlgorithm): %d", sizeof(CInsertionSortAlgorithm));
+	logger.AddMsg(LogMode::Info, "sizeof(CSelectionSortAlgorithm): %d", sizeof(CSelectionSortAlgorithm));
+	logger.AddMsg(LogMode::Info, "sizeof(CQuickSortAlgorithm): %d", sizeof(CQuickSortAlgorithm));
+	logger.AddMsg(LogMode::Info, "sizeof(AlgorithmsVariant): %d", sizeof(AlgorithmsVariant));
+
 	if (!g_glApp.Init(IDR_MENU1, &OnMenuCommand)) throw std::runtime_error("Failed in initialising the Application");
 	else logger.AddMsg(LogMode::Success, "Main window of the application has been created!");
 
