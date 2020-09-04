@@ -13,6 +13,8 @@
 #include <numeric>
 #include "resource.h"
 
+const auto lam = [](auto& p) {p.Render(); };
+
 /*-----------------------------------------------------------------------------+
 |               Implementation of the AlgorithmFactory class               |
 +-----------------------------------------------------------------------------*/
@@ -391,7 +393,7 @@ void CQuickSortAlgorithm::Step() {
 	m_indexPartition++;
 	m_stats.Exchange((*m_viArray)[m_indexPartition], (*m_viArray)[m_h]);
 
-	if (m_indexPartition - 1 > m_l)
+	if (m_indexPartition > 1 && m_indexPartition - 1 > m_l)
 	{
 		m_stack.push(m_l);
 		m_stack.push(m_indexPartition - 1);
@@ -471,9 +473,9 @@ CAlgManager::CAlgManager(const ILogger& logger):
 }
 
 // destructor: #simplification: do we really need to log this here?
-CAlgManager::~CAlgManager() {
-	m_logger.AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
-}
+//CAlgManager::~CAlgManager() {
+//	m_logger.AddMsg(LogMode::Info, "%s clean up", typeid(*this).name());
+//}
 
 // the Update method ----------------------------------------------------------+
 void CAlgManager::Update(double fTime) {

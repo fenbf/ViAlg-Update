@@ -44,36 +44,34 @@ class IAlgorithm {
 public:
 	struct InitFn {
 		CViArray<float>* viData;
-
 		template<typename T>
-		void operator()(T& alg) { alg.Init(viData); }
+		inline void operator()(T& alg) const { alg.Init(viData); }
 	};
 
 	struct StepFn {
 		template<typename T>
-		void operator()(T& alg) { alg.Step(); }
+		inline void operator()(T& alg) const { alg.Step(); }
 	};
 
 	struct GetNameFn {
 		template<typename T>
-		const std::string& operator()(const T& alg) { return alg.GetName(); }
+		inline const std::string& operator()(const T& alg) const { return alg.GetName(); }
 	};
 
 	struct IsDoneFn {
 		template<typename T>
-		bool operator()(const T& alg) { return alg.IsDone(); }
+		inline bool operator()(const T& alg) const { return alg.IsDone(); }
 	};
 
 	struct GetStatsFn {
 		template<typename T>
-		const AlgOpsWrapper& operator()(const T& alg) { return alg.GetStats(); }
+		inline const AlgOpsWrapper& operator()(const T& alg) const { return alg.GetStats(); }
 	};
 public:
 	explicit IAlgorithm(const std::string& name): m_isDone(false), m_name(name) { }
-	virtual ~IAlgorithm() noexcept { }
 
-	virtual void Init(CViArray<float> *viData) = 0;
-	virtual void Step() = 0;
+	void Init(CViArray<float> *viData) { }
+	void Step() { }
 
 	const std::string& GetName() const { return m_name; }
 	bool IsDone() { return m_isDone; }
@@ -81,10 +79,10 @@ public:
 	const AlgOpsWrapper& GetStats() const noexcept { return m_stats; }
 
 protected:
+	AlgOpsWrapper m_stats;
+	std::string m_name;
 	CViArray<float>* m_viArray{ nullptr }; // for observing only, we work on that data
 	bool m_isDone;
-	std::string m_name;
-	AlgOpsWrapper m_stats;
 };
 
 // bubble sort technique
@@ -92,8 +90,8 @@ class CBubbleSortAlgorithm : public IAlgorithm {
 public:
 	explicit CBubbleSortAlgorithm() : IAlgorithm("Bubble Sort") { }
 
-	void Init(CViArray<float>* viData) override;
-	void Step() override;
+	void Init(CViArray<float>* viData);
+	void Step();
 
 private:
 	size_t m_i{ 0 };
@@ -105,8 +103,8 @@ class CShakerSortAlgorithm : public IAlgorithm {
 public:
 	explicit CShakerSortAlgorithm() : IAlgorithm("Shaker Sort") { }
 
-	void Init(CViArray<float> *viData) override;
-	void Step() override;
+	void Init(CViArray<float> *viData);
+	void Step();
 
 private:
 	size_t m_i{ 0 };
@@ -119,8 +117,8 @@ class CSelectionSortAlgorithm : public IAlgorithm {
 public:
 	explicit CSelectionSortAlgorithm() : IAlgorithm("Selection Sort") { }
 
-	void Init(CViArray<float> *viData) override;
-	void Step() override;
+	void Init(CViArray<float> *viData);
+	void Step();
 
 private:
 	size_t m_i{ 0 };
@@ -133,8 +131,8 @@ class CInsertionSortAlgorithm : public IAlgorithm {
 public:
 	explicit CInsertionSortAlgorithm() : IAlgorithm("Insertion Sort") { }
 
-	void Init(CViArray<float> *viData) override;
-	void Step() override;
+	void Init(CViArray<float> *viData);
+	void Step();
 
 private:
 	size_t m_i{ 0 };
@@ -147,8 +145,8 @@ class CShellSortAlgorithm : public IAlgorithm {
 public:
 	explicit CShellSortAlgorithm() : IAlgorithm("Shell Sort") { }
 
-	void Init(CViArray<float> *viData) override;
-	void Step() override;
+	void Init(CViArray<float> *viData);
+	void Step();
 
 private:
 	size_t m_i{ 0 };
@@ -162,16 +160,16 @@ class CQuickSortAlgorithm : public IAlgorithm {
 public:
 	explicit CQuickSortAlgorithm() : IAlgorithm("Quick Sort") { }
 
-	void Init(CViArray<float> * viData) override;
-	void Step() override;
+	void Init(CViArray<float> * viData);
+	void Step();
 
 private:
+	std::stack<size_t> m_stack;
 	size_t m_l{ 0 };
 	size_t m_h{ 0 };
-	std::stack<size_t> m_stack;
-	float m_valPartition{ 0.0f };
 	size_t m_indexPartition{ 0 };
 	size_t m_iter{ 0 };
+	float m_valPartition{ 0.0f };
 };
 
 // shuffle, demo code, testing
@@ -179,12 +177,12 @@ class CShuffleElementsAlgorithm : public IAlgorithm {
 public:
 	explicit CShuffleElementsAlgorithm() : IAlgorithm("Shuffle Elements") { }
 
-	void Init(CViArray<float> * viData) override;
-	void Step() override;
+	void Init(CViArray<float> * viData);
+	void Step();
 
 private:
-	size_t m_i{ 0 };
 	std::vector<int> m_randomOrder;
+	size_t m_i{ 0 };
 };
 
 using AlgorithmsVariant = std::variant<
@@ -209,7 +207,7 @@ public:
 class CAlgManager {
 public:
 	explicit CAlgManager(const ILogger& logger);
-	~CAlgManager();
+	//~CAlgManager();
 
 	void Update(double fTime);
 	void Render(IRenderSystem* avSystem);
