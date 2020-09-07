@@ -159,6 +159,8 @@ AppState::AppState(const CLog& logger) :
 	m_avSystem.m_bTextured = false;
 	m_avSystem.m_bFrame = true;
 	m_avSystem.m_bHoriz = false;
+
+	logger.AddMsg(LogMode::Info, "AppState Created, %s algorithm set.", m_algManager.GetAlgorithmName().c_str());
 }
 
 

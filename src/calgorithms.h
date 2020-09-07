@@ -235,8 +235,6 @@ private:
 	CViArray<float> m_viArrayCurrent; // the current array that we operate on
 	std::vector<float> m_viArrayInitial; // initial data, we can then run the algorithm again using the same data...
 	DataRenderer m_dataRenderer;
-
-	const ILogger& m_logger;
 };
 
 #endif // CALGORITHMS_H

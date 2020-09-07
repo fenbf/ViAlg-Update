@@ -466,10 +466,9 @@ CAlgManager::CAlgManager(const ILogger& logger):
     m_bBeat(1.0),
 	m_bPause(false),
 	m_dOrder(DataOrder::doSpecialRandomized),
-	m_viArrayCurrent(),
-	m_logger(logger)
+	m_viArrayCurrent()
 {
-	m_logger.AddMsg(LogMode::Info, "%s - initialised", typeid(*this).name());
+	logger.AddMsg(LogMode::Info, "%s - initialised", typeid(*this).name());
 }
 
 // destructor: #simplification: do we really need to log this here?
@@ -499,7 +498,6 @@ void CAlgManager::RunAgain() {
 
 // the GenerateData method ----------------------------------------------------+
 void CAlgManager::GenerateData(DataOrder dOrder) {
-	m_logger.AddMsg(LogMode::Info, "%s - Data was generated: type - %s", typeid(*this).name(), GetDataOrderName().c_str());
 	::GenerateData(m_viArrayInitial, dOrder);
 	m_dOrder = dOrder;
 	RegenerateData();
@@ -520,15 +518,12 @@ void CAlgManager::SetAlgorithm(uint16_t algID) {
 	m_viArrayCurrent.SetAdditionalMark(-1); 
 	m_CurrentAlg = AlgorithmFactory::Create(algID);
 	std::visit(IAlgorithm::InitFn{ &m_viArrayCurrent }, m_CurrentAlg);
-	m_logger.AddMsg(LogMode::Info, "%s - %s was assigned the manager", typeid(*this).name(), GetAlgorithmName().c_str());
 }
 
 // the SetNumOfElements method ------------------------------------------------+
 void CAlgManager::SetNumOfElements(size_t iElems) {
 	if(iElems == m_viArrayInitial.size()) 
 		return; 
-
-	m_logger.AddMsg(LogMode::Info, "%s - new number of data element was set to: %ld", typeid(*this).name(), iElems);
 	
 	m_viArrayInitial.resize(iElems); 
 	GenerateData(m_dOrder);
